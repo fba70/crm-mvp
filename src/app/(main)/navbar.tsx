@@ -1,7 +1,6 @@
-import codingInFlowLogo from "@/assets/coding_in_flow_logo.jpg"
+import { CalendarCheck } from "lucide-react"
 import { ModeToggle } from "@/components/mode-toggle"
 import { UserDropdown } from "@/components/user-dropdown"
-import Image from "next/image"
 import Link from "next/link"
 import { getServerSession } from "@/lib/get-session"
 import { unauthorized } from "next/navigation"
@@ -9,6 +8,8 @@ import { unauthorized } from "next/navigation"
 export async function Navbar() {
   const session = await getServerSession()
   const user = session?.user
+
+  // console.log("Navbar user:", user)
 
   if (!user) {
     unauthorized()
@@ -21,14 +22,8 @@ export async function Navbar() {
           href="/dashboard"
           className="flex items-center gap-2 font-semibold"
         >
-          <Image
-            src={codingInFlowLogo}
-            alt="Coding in Flow logo"
-            width={32}
-            height={32}
-            className="border-muted rounded-full border"
-          />
-          Better-Auth Tutorial
+          <CalendarCheck size={32} />
+          CRM MVP APP
         </Link>
         <div className="flex items-center gap-2">
           <ModeToggle />

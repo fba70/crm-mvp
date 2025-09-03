@@ -1,12 +1,20 @@
-import { Navbar } from "./navbar";
+import { Navbar } from "./navbar"
+import { Footer } from "./footer"
 
 export default async function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex min-h-screen flex-col">
-      <Navbar />
-      {children}
+    <div className="grid min-h-screen grid-rows-[60px_1fr_49px] flex-col">
+      <section className="row-start-1">
+        {" "}
+        <Navbar />
+      </section>
+      <section className="row-start-2">{children}</section>
+      <section className="row-start-3">
+        {" "}
+        <Footer />
+      </section>
     </div>
-  );
+  )
 }

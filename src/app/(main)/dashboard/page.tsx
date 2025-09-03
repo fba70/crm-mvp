@@ -9,7 +9,13 @@ import {
 } from "@/components/ui/card"
 import { UserAvatar } from "@/components/user-avatar"
 import { format } from "date-fns"
-import { CalendarDaysIcon, MailIcon, ShieldIcon, UserIcon } from "lucide-react"
+import {
+  CalendarDaysIcon,
+  MailIcon,
+  ShieldIcon,
+  UserIcon,
+  ClipboardList,
+} from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import { getServerSession } from "@/lib/get-session"
@@ -42,6 +48,7 @@ export default async function DashboardPage() {
 
         {user.emailVerified ? null : <EmailVerificationAlert />}
         <ProfileInformation user={user} />
+        <TasksSummary />
       </div>
     </main>
   )
@@ -95,6 +102,25 @@ function ProfileInformation({ user }: ProfileInformationProps) {
               </p>
             </div>
           </div>
+        </div>
+      </CardContent>
+    </Card>
+  )
+}
+
+function TasksSummary() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <ClipboardList />
+          Tasks Summary Information
+        </CardTitle>
+        <CardDescription>Your tasks main statistics</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+          <p>TBD</p>
         </div>
       </CardContent>
     </Card>
