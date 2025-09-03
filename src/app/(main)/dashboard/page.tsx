@@ -71,12 +71,12 @@ function ProfileInformation({ user }: ProfileInformationProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
+        <div className="flex flex-row gap-6 sm:flex-row sm:items-start">
           <div className="flex flex-col items-center gap-3">
             <UserAvatar
               name={user.name}
               image={user.image}
-              className="size-32 sm:size-24"
+              className="size-18 sm:size-18"
             />
             {user.role && (
               <Badge>
@@ -119,9 +119,21 @@ function TasksSummary() {
         <CardDescription>Your tasks main statistics</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="flex flex-col gap-6 sm:flex-row sm:items-start">
-          <p>TBD</p>
+        <div className="flex-crow flex gap-4 sm:flex-row sm:items-start">
+          <p>
+            Total: <span className="pl-2 text-2xl text-blue-600">10</span>
+          </p>
+          <p>
+            Urgent: <span className="pl-2 text-2xl text-orange-400">3</span>
+          </p>
+          <p>
+            Overdue: <span className="pl-2 text-2xl text-red-600">2</span>
+          </p>
         </div>
+
+        <Button className="mt-6" asChild>
+          <Link href="/tasks">View All Tasks</Link>
+        </Button>
       </CardContent>
     </Card>
   )
