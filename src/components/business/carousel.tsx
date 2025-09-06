@@ -1,12 +1,23 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { ChevronDown, ChevronUp, Mail, Phone, Check, X } from "lucide-react"
+import { useRouter } from "next/navigation"
+import {
+  ChevronDown,
+  ChevronUp,
+  Mail,
+  Phone,
+  Check,
+  X,
+  Eye,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Task } from "@/types/task-client"
 import { format } from "date-fns"
 
 export function TasksCarousel({ tasks }: { tasks: Task[] }) {
+  const router = useRouter()
+
   const [currentIndex, setCurrentIndex] = useState(2)
   const [isScrolling, setIsScrolling] = useState(false)
 
@@ -160,7 +171,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
                 {card.type}
               </h3>
               {card.client?.name && (
-                <h4 className="mb-4 text-lg font-semibold text-gray-600">
+                <h4 className="mb-4 text-xl text-gray-600">
                   {card.client.name}
                 </h4>
               )}
@@ -172,6 +183,19 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
             </div>
           </div>
         ))}
+
+        {tasks[currentIndex] && (
+          <Button
+            variant="outline"
+            className="fixed right-35 bottom-50 z-30 rounded-lg"
+            onClick={() => {
+              router.push(`/tasks/${tasks[currentIndex].id}`)
+            }}
+          >
+            <Eye />
+            Task Details
+          </Button>
+        )}
 
         {/* Action Buttons for Center Card */}
         {currentIndex >= 0 && currentIndex < tasks.length && (

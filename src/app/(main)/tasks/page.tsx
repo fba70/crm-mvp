@@ -5,8 +5,6 @@ import { TasksCarousel } from "@/components/business/carousel"
 import type { Task } from "@/types/task-client"
 import prisma from "@/lib/prisma"
 
-// import { Button } from "@/components/ui/button"
-
 export const metadata: Metadata = {
   title: "Tasks",
 }
