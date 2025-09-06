@@ -20,6 +20,10 @@ model User {
   sessions      Session[]
   accounts      Account[]
 
+  // Back relations
+  createdTasks  Task[]    @relation("CreatedTasks")
+  assignedTasks Task[]    @relation("AssignedTasks")
+
   @@unique([email])
   @@map("user")
 }
@@ -67,4 +71,65 @@ model Verification {
   updatedAt  DateTime?
 
   @@map("verification")
+}
+
+enum TaskType {
+  CALL
+  MEET
+  EMAIL
+  OFFER
+  PRESENTATION
+}
+
+enum TaskPriority {
+  LOW   
+  MEDIUM 
+  HIGH   
+}
+
+enum TaskStatus {
+  OPEN
+  CLOSED
+}
+
+model Task {
+  id              String   @id
+  type            TaskType
+  priority        TaskPriority
+  status          TaskStatus @default(OPEN)
+  theme           String?
+  date            DateTime?
+  contactPhone    String?
+  contactEmail    String?
+  contactPerson   String?
+  address         String?
+  urlLink         String?
+
+  // Relations
+  clientId        String?
+  client          Client?   @relation(fields: [clientId], references: [id])
+  createdById     String
+  createdBy       User     @relation("CreatedTasks", fields: [createdById], references: [id])
+  assignedToId    String?
+  assignedTo      User?    @relation("AssignedTasks", fields: [assignedToId], references: [id])
+
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@map("task")
+}
+
+model Client {
+  id              String   @id
+  name            String
+  email           String?
+  phone           String?
+  address         String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  // Back relation
+  tasks           Task[]
+
+  @@map("client")
 }

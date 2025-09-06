@@ -21,6 +21,8 @@ import Link from "next/link"
 import { getServerSession } from "@/lib/get-session"
 import { unauthorized } from "next/navigation"
 import { User } from "@/lib/auth"
+import type { Task } from "@/types/task-client"
+import prisma from "@/lib/prisma"
 
 export const metadata: Metadata = {
   title: "Dashboard",
@@ -36,8 +38,43 @@ export default async function DashboardPage() {
     unauthorized()
   }
 
+  const tasks: Task[] = await prisma.task.findMany({
+    where: {
+      OR: [{ createdById: user.id }, { assignedToId: user.id }],
+    },
+    include: {
+      client: true,
+      createdBy: true,
+      assignedTo: true,
+    },
+  })
+
+  // console.log("TASKS", tasks)
+
+  // 1. Total number of tasks
+  const totalNumberOfTasks = tasks.length
+
+  // 2. Number of overdue tasks (today > task.date)
+  const now = new Date()
+  const numberOfOverdueTasks = tasks.filter((task) => {
+    if (!task.date) return false
+
+    return task.date && new Date(task.date) < now
+  }).length
+
+  // 3. Number of tasks due soon (today < date && today > date - 3 days)
+  const becomesUrgent = new Date(now)
+  becomesUrgent.setDate(now.getDate() + 3)
+
+  const numberOfDueSoonTasks = tasks.filter((task) => {
+    if (!task.date) return false
+
+    const taskDate = new Date(task.date)
+    return taskDate > now && taskDate <= becomesUrgent
+  }).length
+
   return (
-    <main className="mx-auto w-full max-w-6xl px-4 py-12">
+    <main className="mx-auto w-full max-w-6xl px-4 py-6">
       <div className="space-y-6">
         <div className="space-y-2">
           <h1 className="text-2xl font-semibold">Dashboard</h1>
@@ -48,7 +85,11 @@ export default async function DashboardPage() {
 
         {user.emailVerified ? null : <EmailVerificationAlert />}
         <ProfileInformation user={user} />
-        <TasksSummary />
+        <TasksSummary
+          totalNumberOfTasks={totalNumberOfTasks}
+          numberOfUrgentTasks={numberOfDueSoonTasks}
+          numberOfOverdueTasks={numberOfOverdueTasks}
+        />
       </div>
     </main>
   )
@@ -108,7 +149,15 @@ function ProfileInformation({ user }: ProfileInformationProps) {
   )
 }
 
-function TasksSummary() {
+function TasksSummary({
+  totalNumberOfTasks,
+  numberOfUrgentTasks,
+  numberOfOverdueTasks,
+}: {
+  totalNumberOfTasks: number
+  numberOfUrgentTasks: number
+  numberOfOverdueTasks: number
+}) {
   return (
     <Card>
       <CardHeader>
@@ -121,13 +170,22 @@ function TasksSummary() {
       <CardContent>
         <div className="flex-crow flex gap-4 sm:flex-row sm:items-start">
           <p>
-            Total: <span className="pl-2 text-2xl text-blue-600">10</span>
+            Total:{" "}
+            <span className="pl-2 text-2xl text-blue-600">
+              {totalNumberOfTasks}
+            </span>
           </p>
           <p>
-            Urgent: <span className="pl-2 text-2xl text-orange-400">3</span>
+            Urgent:{" "}
+            <span className="pl-2 text-2xl text-orange-400">
+              {numberOfUrgentTasks}
+            </span>
           </p>
           <p>
-            Overdue: <span className="pl-2 text-2xl text-red-600">2</span>
+            Overdue:{" "}
+            <span className="pl-2 text-2xl text-red-600">
+              {numberOfOverdueTasks}
+            </span>
           </p>
         </div>
 

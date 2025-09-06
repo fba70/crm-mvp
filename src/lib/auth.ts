@@ -3,6 +3,7 @@ import { prismaAdapter } from "better-auth/adapters/prisma"
 import prisma from "@/lib/prisma"
 import { sendEmails } from "./email"
 import { createAuthMiddleware, APIError } from "better-auth/api"
+import { oAuthProxy } from "better-auth/plugins"
 import { passwordSchema } from "./validation"
 
 export const auth = betterAuth({
@@ -13,10 +14,12 @@ export const auth = betterAuth({
     github: {
       clientId: process.env.GITHUB_CLIENT_ID!,
       clientSecret: process.env.GITHUB_CLIENT_SECRET,
+      // redirectURI: "https://crm-mvp-2025.vercel.app/api/auth/callback/github",
     },
     google: {
       clientId: process.env.GOOGLE_CLIENT_ID!,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      // redirectURI: "https://crm-mvp-2025.vercel.app/api/auth/callback/google",
     },
   },
   emailAndPassword: {
@@ -83,6 +86,12 @@ export const auth = betterAuth({
       }
     }),
   }, // This hook is to implement zod validation on a back-end side
+  plugins: [
+    oAuthProxy({
+      productionURL: "https://crm-mvp-2025.vercel.app",
+      currentURL: "http://localhost:3000",
+    }),
+  ],
 })
 
 export type Session = typeof auth.$Infer.Session
