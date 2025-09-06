@@ -10,6 +10,8 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
+import { Button } from "@/components/ui/button"
+import RouteButton from "@/components/business/route-button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
 
@@ -45,8 +47,13 @@ export default async function TaskPage({ params }: { params: { id: string } }) {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
+      <div className="flex justify-between">
+        <div className="flex w-[95%] flex-row items-center justify-end gap-2">
+          <RouteButton pathParam="/tasks" nameParam="Go back to tasks list" />
+        </div>
+      </div>
       <div className="space-y-6">
-        <Card className="mx-auto mt-8 max-w-xl">
+        <Card className="mx-auto mt-6 flex w-[90%] max-w-xl flex-col">
           <CardHeader>
             <CardTitle className="flex items-center gap-4">
               <p>
@@ -138,6 +145,9 @@ export default async function TaskPage({ params }: { params: { id: string } }) {
               )}
             </div>
           </CardContent>
+          <Button variant="default" className="mx-auto w-[80%]">
+            Edit Task
+          </Button>
         </Card>
       </div>
     </main>
