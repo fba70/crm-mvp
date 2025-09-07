@@ -1,45 +1,70 @@
-import type { Metadata } from "next"
-import { getServerSession } from "@/lib/get-session"
+"use client"
+
+import { useState, useEffect } from "react"
+import { useSession } from "@/lib/auth-client"
 import { unauthorized } from "next/navigation"
 import { TasksCarousel } from "@/components/business/carousel"
-import type { Task } from "@/types/task-client"
-import prisma from "@/lib/prisma"
+import type { Task, Client } from "@/types/task-client"
+import FormNewTaskDialog from "@/components/forms/form-new-task"
+import axiosApi from "@/lib/axios"
+import TasksLoading from "./loading"
 
-export const metadata: Metadata = {
-  title: "Tasks",
-}
+export default function TasksPage() {
+  const { data: user, isPending } = useSession()
 
-export default async function TasksPage() {
-  const session = await getServerSession()
-  const user = session?.user
-
-  if (!user) {
+  if (!user && !isPending) {
     unauthorized()
   }
 
-  const tasks: Task[] = await prisma.task.findMany({
-    where: {
-      OR: [{ createdById: user.id }, { assignedToId: user.id }],
-    },
-    include: {
-      client: true,
-      createdBy: true,
-      assignedTo: true,
-    },
-  })
+  const [tasks, setTasks] = useState<Task[] | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [clients, setClients] = useState<Client[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
 
-  // console.log("USER", user)
-  // console.log("TASKS", tasks)
+  const fetchTasks = () => {
+    setLoading(true)
+    axiosApi
+      .get(`/api/task?userId=${user?.user.id}`)
+      .then((res) => setTasks(res.data))
+      .finally(() => setLoading(false))
+  }
+
+  const fetchClients = () => {
+    setClientsLoading(true)
+    axiosApi
+      .get("/api/client")
+      .then((res) => setClients(res.data))
+      .finally(() => setClientsLoading(false))
+  }
+
+  useEffect(() => {
+    if (user && !isPending) {
+      fetchTasks()
+    }
+  }, [user, isPending])
+
+  useEffect(() => {
+    fetchClients()
+  }, [])
+
+  if (loading || clientsLoading) return <TasksLoading />
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
       <div className="space-y-6">
-        <div className="space-y-2 px-4">
+        <div className="flex flex-row justify-between px-4">
           <h1 className="text-2xl font-semibold">Tasks</h1>
+          {user && (
+            <FormNewTaskDialog
+              clients={clients}
+              userId={user?.user.id}
+              onSuccess={() => fetchTasks()}
+            />
+          )}
         </div>
 
         <main className="flex flex-1 flex-col">
-          <TasksCarousel tasks={tasks} />
+          {tasks && <TasksCarousel tasks={tasks} />}
         </main>
       </div>
     </main>

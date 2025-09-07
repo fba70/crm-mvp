@@ -95,7 +95,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
     return Array.from({ length: 3 }, (_, i) => (
       <span
         key={i}
-        className={`text-2xl ${i < count ? "text-red-500" : "text-gray-300"}`}
+        className={`text-3xl ${i < count ? "text-red-500" : "text-gray-300"}`}
       >
         ★
       </span>
@@ -130,12 +130,6 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
             FILTERN <X className="ml-2 h-4 w-4" />
           </Button>
         </div>
-        <div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-green-500 font-bold text-white">
-          1
-          <div className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-blue-500 text-xs text-white">
-            1
-          </div>
-        </div>
       </div>
 
       {/* Carousel Container */}
@@ -167,16 +161,16 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
               className={`flex h-full w-full flex-col items-center justify-center rounded-full p-6 shadow-lg ${getTaskBgColor(card.date)}`}
             >
               <div className="mb-4">{renderStars(card.priority)}</div>
-              <h3 className="mb-1 text-xl font-bold text-gray-700">
+              <h3 className="mb-1 text-2xl font-bold text-gray-700">
                 {card.type}
               </h3>
               {card.client?.name && (
-                <h4 className="mb-4 text-xl text-gray-600">
+                <h4 className="mb-4 max-w-[180px] truncate text-2xl text-gray-600">
                   {card.client.name}
                 </h4>
               )}
               {card.date && (
-                <p className="text-sm font-medium text-gray-500">
+                <p className="text-lg font-medium text-gray-500">
                   {format(new Date(card.date), "dd.MM.yyyy")}
                 </p>
               )}
@@ -221,7 +215,15 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
               variant="outline"
               className="absolute top-1/2 right-2 z-15 h-16 w-16 -translate-y-1/2 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
             >
-              <Check className="h-8 w-8" />
+              <Check className="h-8 w-8 font-bold text-green-600" />
+            </Button>
+
+            <Button
+              size="lg"
+              variant="outline"
+              className="absolute right-2 bottom-1/3 z-15 h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+            >
+              <X className="h-8 w-8 text-red-600" />
             </Button>
           </>
         )}

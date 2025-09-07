@@ -42,38 +42,32 @@ type TaskEditFormFields = {
   clientId?: string
 }
 
-export default function FormTaskEditDialog({
-  task,
+export default function FormNewTaskDialog({
   clients,
+  userId,
   onSuccess,
-  triggerLabel = "Edit Task",
+  triggerLabel = "Add New Task",
 }: {
-  task: Task
   clients: Client[]
+  userId: string
   onSuccess: (t: Task) => void
   triggerLabel?: string
 }) {
   const form = useForm<TaskEditFormFields>({
     defaultValues: {
-      status: task.status,
-      type: task.type,
-      priority: task.priority,
-      theme: task.theme || undefined,
-      date: task.date
-        ? typeof task.date === "string"
-          ? task.date.slice(0, 10)
-          : new Date(task.date).toISOString().slice(0, 10)
-        : "",
-      contactPhone: task.contactPhone || "",
-      contactEmail: task.contactEmail || "",
-      contactPerson: task.contactPerson || "",
-      address: task.address || "",
-      urlLink: task.urlLink || "",
-      clientId: task.clientId || "",
+      status: "OPEN",
+      type: "CALL",
+      priority: "HIGH",
+      theme: "",
+      date: new Date().toISOString().slice(0, 10),
+      contactPhone: "",
+      contactEmail: "",
+      contactPerson: "",
+      address: "",
+      urlLink: "",
+      clientId: "",
     },
   })
-
-  console.log("TASK data", task)
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -82,13 +76,18 @@ export default function FormTaskEditDialog({
   const onSubmit = (data: TaskEditFormFields) => {
     setError(null)
     startTransition(async () => {
-      const payload = { ...data }
+      const payload = {
+        ...data,
+        createdById: userId,
+        assignedToId: userId,
+      }
+
       if (payload.date) {
         payload.date = new Date(payload.date).toISOString()
       }
 
       try {
-        const res = await axiosApi.patch(`/api/task/${task.id}`, payload)
+        const res = await axiosApi.post(`/api/task/`, payload)
         onSuccess(res.data)
         setOpen(false)
       } catch (err) {
@@ -101,7 +100,7 @@ export default function FormTaskEditDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="mx-auto w-[80%]">
+        <Button variant="default" className="">
           {triggerLabel}
         </Button>
       </DialogTrigger>

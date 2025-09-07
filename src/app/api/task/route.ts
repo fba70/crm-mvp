@@ -31,3 +31,25 @@ export async function GET(req: NextRequest) {
 
   return NextResponse.json(tasks)
 }
+
+export async function POST(req: NextRequest) {
+  try {
+    const data = await req.json()
+
+    // If date is present and is a string, convert to ISO string
+    if (data.date) {
+      data.date = new Date(data.date).toISOString()
+    }
+
+    const newTask = await prisma.task.create({
+      data,
+    })
+    return NextResponse.json(newTask, { status: 201 })
+  } catch (error) {
+    console.error("Task create error", error)
+    return NextResponse.json(
+      { error: "Failed to create task" },
+      { status: 500 },
+    )
+  }
+}

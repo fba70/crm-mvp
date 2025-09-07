@@ -93,7 +93,7 @@ enum TaskStatus {
 }
 
 model Task {
-  id              String   @id
+  id              String   @id @default(uuid())
   type            TaskType
   priority        TaskPriority
   status          TaskStatus @default(OPEN)
@@ -120,7 +120,7 @@ model Task {
 }
 
 model Client {
-  id              String   @id
+  id              String   @id @default(uuid())
   name            String
   email           String?
   phone           String?

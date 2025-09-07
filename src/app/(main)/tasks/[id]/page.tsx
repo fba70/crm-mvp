@@ -13,7 +13,7 @@ import {
 import RouteButton from "@/components/business/route-button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import FormTaskEditDialog from "@/components/business/form-task-edit"
+import FormTaskEditDialog from "@/components/forms/form-task-edit"
 import type { Task, Client } from "@/types/task-client"
 import { unauthorized, notFound } from "next/navigation"
 import TaskLoading from "./loading"
@@ -31,19 +31,27 @@ export default function TaskPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
 
-  useEffect(() => {
-    if (!id) return
+  const fetchTask = () => {
     setLoading(true)
     axiosApi
       .get(`/api/task/${id}`)
       .then((res) => setTask(res.data))
-      .catch(() => router.replace("/not-found"))
       .finally(() => setLoading(false))
+  }
 
+  const fetchClients = () => {
+    setClientsLoading(true)
     axiosApi
       .get("/api/client")
       .then((res) => setClients(res.data))
       .finally(() => setClientsLoading(false))
+  }
+
+  useEffect(() => {
+    if (!id) return
+
+    fetchTask()
+    fetchClients()
   }, [id, router])
 
   if (loading || clientsLoading) return <TaskLoading />
@@ -57,7 +65,8 @@ export default function TaskPage() {
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
       <div className="flex justify-between">
-        <div className="flex w-[95%] flex-row items-center justify-end gap-2">
+        <div className="flex w-[95%] flex-row items-center justify-between gap-2">
+          <h1 className="ml-6 text-2xl font-semibold">Task</h1>
           <RouteButton pathParam="/tasks" nameParam="Go back to tasks list" />
         </div>
       </div>
@@ -157,7 +166,7 @@ export default function TaskPage() {
           <FormTaskEditDialog
             task={task}
             clients={clients}
-            onSuccess={(updatedTask) => setTask(updatedTask)}
+            onSuccess={fetchTask}
           />
         </Card>
       </div>
