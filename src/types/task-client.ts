@@ -25,3 +25,13 @@ export type Task = {
   createdAt: string | Date
   updatedAt: string | Date
 }
+
+export type Client = {
+  id: string
+  name: string
+  email?: string | null
+  phone?: string | null
+  address?: string | null
+  createdAt: string | Date
+  updatedAt: string | Date
+}

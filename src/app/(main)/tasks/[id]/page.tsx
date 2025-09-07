@@ -1,8 +1,8 @@
-import type { Metadata } from "next"
-import { getServerSession } from "@/lib/get-session"
-import { unauthorized, notFound } from "next/navigation"
-import type { Task } from "@/types/task-client"
-import prisma from "@/lib/prisma"
+"use client"
+
+import { useEffect, useState } from "react"
+import { useRouter, useParams } from "next/navigation"
+import { useSession } from "@/lib/auth-client"
 import {
   Card,
   CardContent,
@@ -10,40 +10,49 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import RouteButton from "@/components/business/route-button"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+import FormTaskEditDialog from "@/components/business/form-task-edit"
+import type { Task, Client } from "@/types/task-client"
+import { unauthorized, notFound } from "next/navigation"
+import TaskLoading from "./loading"
+import axiosApi from "@/lib/axios"
 
-export const metadata: Metadata = {
-  title: "Tasks",
-}
+export default function TaskPage() {
+  const router = useRouter()
+  const params = useParams()
+  const { id } = params as { id: string }
 
-export default async function TaskPage({ params }: { params: { id: string } }) {
-  const session = await getServerSession()
-  const user = session?.user
+  const { data: user, isPending } = useSession()
 
-  if (!user) {
+  const [task, setTask] = useState<Task | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [clients, setClients] = useState<Client[]>([])
+  const [clientsLoading, setClientsLoading] = useState(true)
+
+  useEffect(() => {
+    if (!id) return
+    setLoading(true)
+    axiosApi
+      .get(`/api/task/${id}`)
+      .then((res) => setTask(res.data))
+      .catch(() => router.replace("/not-found"))
+      .finally(() => setLoading(false))
+
+    axiosApi
+      .get("/api/client")
+      .then((res) => setClients(res.data))
+      .finally(() => setClientsLoading(false))
+  }, [id, router])
+
+  if (loading || clientsLoading) return <TaskLoading />
+  if (!user && !isPending) {
     unauthorized()
   }
-
-  const { id } = await params
-
-  const task: Task | null = await prisma.task.findUnique({
-    where: { id },
-    include: {
-      client: true,
-      createdBy: true,
-      assignedTo: true,
-    },
-  })
-
   if (!task) {
     notFound()
   }
-
-  // console.log("USER", user)
-  // console.log("TASKS", tasks)
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -145,9 +154,11 @@ export default async function TaskPage({ params }: { params: { id: string } }) {
               )}
             </div>
           </CardContent>
-          <Button variant="default" className="mx-auto w-[80%]">
-            Edit Task
-          </Button>
+          <FormTaskEditDialog
+            task={task}
+            clients={clients}
+            onSuccess={(updatedTask) => setTask(updatedTask)}
+          />
         </Card>
       </div>
     </main>
