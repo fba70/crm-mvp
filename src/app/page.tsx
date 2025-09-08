@@ -9,9 +9,7 @@ export default function Home() {
         <div className="mb-8 flex items-center justify-center gap-4">
           <CalendarCheck size={128} />
         </div>
-        <h1 className="mb-16 text-3xl font-semibold sm:text-4xl">
-          CRM MVP APP
-        </h1>
+        <h1 className="mb-16 text-3xl font-semibold sm:text-4xl">CRM APP</h1>
         <div className="mx-auto mt-6 flex max-w-sm flex-col gap-3 sm:flex-row sm:justify-center">
           <Button asChild>
             <Link href="/sign-in">Sign In</Link>

@@ -16,6 +16,7 @@ import {
   SelectContent,
   SelectItem,
 } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 
 export default function TasksPage() {
   const { data: user, isPending } = useSession()
@@ -32,6 +33,7 @@ export default function TasksPage() {
   const [clientNameFilter, setClientNameFilter] = useState("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [priorityFilter, setPriorityFilter] = useState<string>("ALL")
+  const [showClosed, setShowClosed] = useState(false)
 
   const fetchTasks = () => {
     setLoading(true)
@@ -62,6 +64,8 @@ export default function TasksPage() {
   const filteredTasks = tasks
     ?.filter(
       (task) =>
+        task.status !== "DELETED" && // Exclude deleted tasks
+        (showClosed || task.status !== "CLOSED") && // Only include CLOSED if checked
         (typeFilter === "ALL" || task.type === typeFilter) &&
         (priorityFilter === "ALL" || task.priority === priorityFilter) &&
         (clientNameFilter === "" ||
@@ -99,6 +103,17 @@ export default function TasksPage() {
             onChange={(e) => setClientNameFilter(e.target.value)}
             className="w-[220px]"
           />
+
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="show-closed"
+              checked={showClosed}
+              onCheckedChange={(v) => setShowClosed(Boolean(v))}
+            />
+            <label htmlFor="show-closed" className="text-sm">
+              include closed tasks
+            </label>
+          </div>
         </div>
 
         <div className="mb-2 flex flex-row items-center justify-between gap-4 px-6 pb-2">
