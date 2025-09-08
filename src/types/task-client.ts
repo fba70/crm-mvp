@@ -2,7 +2,7 @@ export type Task = {
   id: string
   type: "CALL" | "MEET" | "EMAIL" | "OFFER" | "PRESENTATION"
   priority: "LOW" | "MEDIUM" | "HIGH"
-  status: "OPEN" | "CLOSED"
+  status: "OPEN" | "CLOSED" | "DELETED"
   theme?: string | null
   date?: string | Date | null
   contactPhone?: string | null
@@ -10,6 +10,7 @@ export type Task = {
   contactPerson?: string | null
   address?: string | null
   urlLink?: string | null
+  statusChangeReason?: string | null
   clientId?: string | null
   client?: {
     id: string

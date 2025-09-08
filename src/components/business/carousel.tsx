@@ -14,12 +14,15 @@ import {
 import { Button } from "@/components/ui/button"
 import type { Task } from "@/types/task-client"
 import { format } from "date-fns"
+import FormTaskStatusChangeDialog from "@/components/forms/form-task-status-change"
 
 export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   const router = useRouter()
 
   const [currentIndex, setCurrentIndex] = useState(2)
   const [isScrolling, setIsScrolling] = useState(false)
+  const [statusDialogOpen1, setStatusDialogOpen1] = useState(false)
+  const [statusDialogOpen2, setStatusDialogOpen2] = useState(false)
 
   const handleScroll = (direction: "up" | "down") => {
     if (isScrolling) return
@@ -184,37 +187,75 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         {/* Action Buttons for Center Card */}
         {currentIndex >= 0 && currentIndex < tasks.length && (
           <>
-            <Button
-              size="lg"
-              variant="outline"
-              className="absolute top-1/2 left-2 z-15 h-16 w-16 -translate-y-1/2 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+            <a
+              href={`mailto:${tasks[currentIndex]?.client?.email ?? ""}`}
+              onClick={(e) => {
+                if (!tasks[currentIndex]?.client?.email) e.preventDefault()
+              }}
             >
-              <Mail className="h-8 w-8" />
-            </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="absolute top-1/2 left-2 z-15 h-16 w-16 -translate-y-1/2 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+              >
+                <Mail className="h-8 w-8" />
+              </Button>
+            </a>
 
-            <Button
-              size="lg"
-              variant="outline"
-              className="absolute bottom-1/3 left-2 z-15 h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+            <a
+              href={`tel:${tasks[currentIndex]?.client?.phone ?? ""}`}
+              onClick={(e) => {
+                if (!tasks[currentIndex]?.client?.phone) e.preventDefault()
+              }}
             >
-              <Phone className="h-8 w-8" />
-            </Button>
+              <Button
+                size="lg"
+                variant="outline"
+                className="absolute bottom-1/3 left-2 z-15 h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+              >
+                <Phone className="h-8 w-8" />
+              </Button>
+            </a>
 
             <Button
               size="lg"
               variant="outline"
               className="absolute top-1/2 right-2 z-15 h-16 w-16 -translate-y-1/2 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+              onClick={() => setStatusDialogOpen1(true)}
             >
               <Check className="h-8 w-8 font-bold text-green-600" />
             </Button>
+
+            {statusDialogOpen1 && (
+              <div className="z-200">
+                <FormTaskStatusChangeDialog
+                  open={statusDialogOpen1}
+                  onOpenChange={setStatusDialogOpen1}
+                  task={tasks[currentIndex]}
+                  status="CLOSED"
+                  onSuccess={() => setStatusDialogOpen1(false)}
+                />
+              </div>
+            )}
 
             <Button
               size="lg"
               variant="outline"
               className="absolute right-2 bottom-1/3 z-15 h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+              onClick={() => setStatusDialogOpen2(true)}
             >
               <X className="h-8 w-8 text-red-600" />
             </Button>
+
+            {statusDialogOpen2 && (
+              <FormTaskStatusChangeDialog
+                open={statusDialogOpen2}
+                onOpenChange={setStatusDialogOpen2}
+                task={tasks[currentIndex]}
+                status="DELETED"
+                onSuccess={() => setStatusDialogOpen2(false)}
+              />
+            )}
           </>
         )}
 

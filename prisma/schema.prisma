@@ -91,6 +91,7 @@ enum TaskPriority {
 enum TaskStatus {
   OPEN
   CLOSED
+  DELETED
 }
 
 model Task {
@@ -105,6 +106,7 @@ model Task {
   contactPerson   String?
   address         String?
   urlLink         String?
+  statusChangeReason String?
 
   // Relations
   clientId        String?

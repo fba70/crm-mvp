@@ -32,13 +32,14 @@ type TaskEditFormFields = {
   theme?: string
   type: "CALL" | "MEET" | "EMAIL" | "OFFER" | "PRESENTATION"
   priority: "LOW" | "MEDIUM" | "HIGH"
-  status: "OPEN" | "CLOSED"
+  status: "OPEN" | "CLOSED" | "DELETED"
   date: string
   contactPhone?: string
   contactEmail?: string
   contactPerson?: string
   address?: string
   urlLink?: string
+  statusChangeReason?: string
   clientId?: string
 }
 
@@ -69,6 +70,7 @@ export default function FormTaskEditDialog({
       contactPerson: task.contactPerson || "",
       address: task.address || "",
       urlLink: task.urlLink || "",
+      statusChangeReason: task.statusChangeReason || "",
       clientId: task.clientId || "",
     },
   })
@@ -115,27 +117,47 @@ export default function FormTaskEditDialog({
             className="space-y-4"
             autoComplete="off"
           >
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">Status</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Task status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="OPEN">OPEN</SelectItem>
-                        <SelectItem value="CLOSED">CLOSED</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-row gap-8">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Status</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Task status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="OPEN">OPEN</SelectItem>
+                          <SelectItem value="CLOSED">CLOSED</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="statusChangeReason"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Status Change Reason
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="url" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
             <div className="flex flex-row gap-8">
               <FormField
                 control={form.control}

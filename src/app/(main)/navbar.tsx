@@ -4,6 +4,7 @@ import { UserDropdown } from "@/components/user-dropdown"
 import Link from "next/link"
 import { getServerSession } from "@/lib/get-session"
 import { unauthorized } from "next/navigation"
+import NewsDrawer from "@/components/business/news-drawer"
 
 export async function Navbar() {
   const session = await getServerSession()
@@ -23,9 +24,10 @@ export async function Navbar() {
           className="flex items-center gap-2 font-semibold"
         >
           <CalendarCheck size={32} />
-          CRM MVP APP
+          CRM APP
         </Link>
         <div className="flex items-center gap-2">
+          <NewsDrawer />
           <ModeToggle />
           <UserDropdown user={user} />
         </div>

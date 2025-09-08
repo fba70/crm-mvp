@@ -2,11 +2,25 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { House } from "lucide-react"
 
 export function Footer() {
   const pathname = usePathname()
   return (
     <footer className="flex h-[50px] flex-row items-center justify-center border-t bg-gray-600 text-white">
+      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
+        <Link
+          href="/dashboard"
+          className={
+            pathname.startsWith("/dashboard")
+              ? "font-bold text-blue-400"
+              : "font-normal"
+          }
+        >
+          <House />
+        </Link>
+      </div>
+
       <div className="flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
           href="/tasks"
@@ -22,9 +36,9 @@ export function Footer() {
 
       <div className="flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
-          href="/dashboard"
+          href="/transitions"
           className={
-            pathname === "/dashboard"
+            pathname === "/transitions"
               ? "font-bold text-blue-400"
               : "font-normal"
           }
