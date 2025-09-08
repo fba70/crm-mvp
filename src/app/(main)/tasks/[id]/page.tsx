@@ -88,79 +88,70 @@ export default function TaskPage() {
               >
                 {task.status}
               </Badge>
+              <Badge
+                variant="outline"
+                className={
+                  task.priority === "HIGH"
+                    ? "border-red-600 text-red-600"
+                    : task.priority === "MEDIUM"
+                      ? "border-yellow-600 text-yellow-600"
+                      : "border-gray-300 text-blue-500"
+                }
+              >
+                {task.priority}
+              </Badge>
             </CardTitle>
             <CardDescription>{task.theme || "No theme"}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">Priority:</span>{" "}
-              <span className="text-lg font-semibold">
-                <Badge
-                  variant="outline"
-                  className={
-                    task.priority === "HIGH"
-                      ? "border-red-600 text-red-600"
-                      : task.priority === "MEDIUM"
-                        ? "border-yellow-600 text-yellow-600"
-                        : "border-gray-300 text-blue-500"
-                  }
-                >
-                  {task.priority}
-                </Badge>
-              </span>
-            </div>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">Client:</span>{" "}
+            <div className="mb-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+              <span className="pr-2 text-sm text-gray-500">Client:</span>
               <span className="text-lg font-semibold">
                 {task.client?.name || "—"}
               </span>
-            </div>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">Due date:</span>{" "}
+
+              <span className="pr-2 text-sm text-gray-500">Due date:</span>
               <span className="text-lg font-semibold">
                 {task.date ? format(new Date(task.date), "dd.MM.yyyy") : "—"}
               </span>
-            </div>
-            <div className="mb-2">
+
               <span className="pr-2 text-sm text-gray-500">
                 Contact Person:
-              </span>{" "}
+              </span>
               <span className="text-lg font-semibold">
                 {task.contactPerson || "—"}
               </span>
-            </div>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">Contact Email:</span>{" "}
+
+              <span className="pr-2 text-sm text-gray-500">Contact Email:</span>
               <span className="text-lg font-semibold">
                 {task.contactEmail || "—"}
               </span>
-            </div>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">Contact Phone:</span>{" "}
+
+              <span className="pr-2 text-sm text-gray-500">Contact Phone:</span>
               <span className="text-lg font-semibold">
                 {task.contactPhone || "—"}
               </span>
-            </div>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">Address:</span>{" "}
+
+              <span className="pr-2 text-sm text-gray-500">Address:</span>
               <span className="text-lg font-semibold">
                 {task.address || "—"}
               </span>
-            </div>
-            <div className="mb-2">
-              <span className="pr-2 text-sm text-gray-500">URL:</span>{" "}
-              {task.urlLink ? (
-                <a
-                  href={task.urlLink}
-                  className="text-blue-600 underline"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  {task.urlLink}
-                </a>
-              ) : (
-                "—"
-              )}
+
+              <span className="pr-2 text-sm text-gray-500">URL:</span>
+              <span className="text-lg font-semibold">
+                {task.urlLink ? (
+                  <a
+                    href={task.urlLink}
+                    className="text-blue-600 underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {task.urlLink}
+                  </a>
+                ) : (
+                  "—"
+                )}
+              </span>
             </div>
           </CardContent>
           <FormTaskEditDialog

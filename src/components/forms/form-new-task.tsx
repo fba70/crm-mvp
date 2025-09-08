@@ -91,8 +91,8 @@ export default function FormNewTaskDialog({
         onSuccess(res.data)
         setOpen(false)
       } catch (err) {
-        console.log("Task update error", err)
-        setError("Failed to update task")
+        console.log("Task create error", err)
+        setError("Failed to create task")
       }
     })
   }
@@ -106,7 +106,7 @@ export default function FormNewTaskDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
+          <DialogTitle>Create Task</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form

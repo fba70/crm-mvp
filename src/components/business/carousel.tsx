@@ -118,20 +118,10 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
     }
   }
 
-  return (
-    <div className="relative h-[80vh] w-full overflow-hidden bg-gradient-to-t from-white to-gray-200">
-      {/* Header Controls */}
-      <div className="absolute top-6 right-6 left-6 z-20 flex items-center justify-between">
-        <div className="flex gap-4">
-          <Button variant="outline" className="bg-white/80 backdrop-blur-sm">
-            SORTIEREN <X className="ml-2 h-4 w-4" />
-          </Button>
-          <Button variant="outline" className="bg-white/80 backdrop-blur-sm">
-            FILTERN <X className="ml-2 h-4 w-4" />
-          </Button>
-        </div>
-      </div>
+  // Gradient: bg-gradient-to-t from-white to-gray-200
 
+  return (
+    <div className="relative h-[68vh] w-full overflow-hidden">
       {/* Carousel Container */}
       <div className="relative flex h-full w-full items-center justify-center">
         {/* Progress Ring for Center Card */}
@@ -181,7 +171,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         {tasks[currentIndex] && (
           <Button
             variant="outline"
-            className="fixed right-35 bottom-50 z-30 rounded-lg"
+            className="fixed right-35 bottom-40 z-30 rounded-lg"
             onClick={() => {
               router.push(`/tasks/${tasks[currentIndex].id}`)
             }}
@@ -232,7 +222,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         <Button
           variant="ghost"
           size="lg"
-          className="absolute bottom-8 left-1/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full bg-white/80 backdrop-blur-sm"
+          className="absolute bottom-4 left-1/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full bg-white/80 backdrop-blur-sm"
           onClick={() => handleScroll("down")}
           disabled={currentIndex >= tasks.length - 1}
         >
@@ -242,7 +232,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         <Button
           variant="ghost"
           size="lg"
-          className="absolute bottom-8 left-2/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full bg-white/80 backdrop-blur-sm"
+          className="absolute bottom-4 left-2/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full bg-white/80 backdrop-blur-sm"
           onClick={() => handleScroll("up")}
           disabled={currentIndex >= 0 && currentIndex <= 0}
         >

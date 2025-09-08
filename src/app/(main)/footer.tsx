@@ -1,12 +1,20 @@
+"use client"
+
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 
 export function Footer() {
+  const pathname = usePathname()
   return (
     <footer className="flex h-[50px] flex-row items-center justify-center border-t bg-gray-600 text-white">
       <div className="flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-semibold"
+          href="/tasks"
+          className={
+            pathname.startsWith("/tasks")
+              ? "font-bold text-blue-400"
+              : "font-normal"
+          }
         >
           AUFGABEN
         </Link>
@@ -15,27 +23,26 @@ export function Footer() {
       <div className="flex max-w-6xl items-center justify-between px-4 py-3">
         <Link
           href="/dashboard"
-          className="flex items-center gap-2 font-semibold"
-        >
-          FEED
-        </Link>
-      </div>
-
-      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-semibold"
-        >
-          KUNDEN
-        </Link>
-      </div>
-
-      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-semibold"
+          className={
+            pathname === "/dashboard"
+              ? "font-bold text-blue-400"
+              : "font-normal"
+          }
         >
           ÜBERGABE
+        </Link>
+      </div>
+
+      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
+        <Link
+          href="/clients"
+          className={
+            pathname.startsWith("/clients")
+              ? "font-bold text-blue-400"
+              : "font-normal"
+          }
+        >
+          KUNDEN
         </Link>
       </div>
     </footer>
