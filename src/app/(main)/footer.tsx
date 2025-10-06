@@ -7,8 +7,8 @@ import { House } from "lucide-react"
 export function Footer() {
   const pathname = usePathname()
   return (
-    <footer className="flex h-[50px] flex-row items-center justify-center border-t bg-gray-600 text-white">
-      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
+    <footer className="flex h-[50px] flex-row items-center justify-center gap-5 border-t bg-gray-600 text-white">
+      <div className="flex max-w-6xl items-center justify-between py-3">
         <Link
           href="/dashboard"
           className={
@@ -21,7 +21,7 @@ export function Footer() {
         </Link>
       </div>
 
-      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
+      <div className="flex max-w-6xl items-center justify-between py-3">
         <Link
           href="/tasks"
           className={
@@ -34,7 +34,7 @@ export function Footer() {
         </Link>
       </div>
 
-      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
+      <div className="flex max-w-6xl items-center justify-between py-3">
         <Link
           href="/transitions"
           className={
@@ -47,7 +47,7 @@ export function Footer() {
         </Link>
       </div>
 
-      <div className="flex max-w-6xl items-center justify-between px-4 py-3">
+      <div className="flex max-w-6xl items-center justify-between py-3">
         <Link
           href="/clients"
           className={
@@ -57,6 +57,19 @@ export function Footer() {
           }
         >
           KUNDEN
+        </Link>
+      </div>
+
+      <div className="flex max-w-6xl items-center justify-between py-3">
+        <Link
+          href="/feed"
+          className={
+            pathname.startsWith("/feed")
+              ? "font-bold text-blue-400"
+              : "font-normal"
+          }
+        >
+          FEED
         </Link>
       </div>
     </footer>

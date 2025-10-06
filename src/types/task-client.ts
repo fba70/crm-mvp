@@ -36,3 +36,35 @@ export type Client = {
   createdAt: string | Date
   updatedAt: string | Date
 }
+
+export enum FeedType {
+  RECOMMENDATION = "RECOMMENDATION",
+  CLIENT_ACTIVITY = "CLIENT_ACTIVITY",
+  INDUSTRY_INFO = "INDUSTRY_INFO",
+  COLLEAGUES_UPDATE = "COLLEAGUES_UPDATE",
+}
+
+export enum FeedStatus {
+  NEW = "NEW",
+  CANCELLED = "CANCELLED",
+  IN_PROGRESS = "IN_PROGRESS",
+  ACTION_COMPLETED = "ACTION_COMPLETED",
+  CLOSED = "CLOSED",
+}
+
+export interface Feed {
+  id: string
+  type: FeedType
+  status: FeedStatus
+  actionCall?: boolean
+  actionEmail?: boolean
+  actionBooking?: boolean
+  actionTask?: boolean
+  metadata?: string
+  clientId?: string
+  client?: Client // Assuming Client is defined elsewhere
+  taskId?: string
+  task?: Task // Assuming Task is defined elsewhere
+  createdAt: Date
+  updatedAt: Date
+}

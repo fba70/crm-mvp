@@ -9,7 +9,6 @@ import ClientsLoading from "./loading"
 import FormNewClientDialog from "@/components/forms/form-new-client"
 import FormClientEditDialog from "@/components/forms/form-client-edit"
 import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
 import { MapPinHouse, AtSign, Phone } from "lucide-react"
 import Link from "next/link"
 

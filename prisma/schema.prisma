@@ -119,6 +119,9 @@ model Task {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
+  // Back relation
+  feeds          Feed[]
+
   @@map("task")
 }
 
@@ -136,6 +139,44 @@ model Client {
 
   // Back relation
   tasks           Task[]
+  feeds          Feed[]
 
   @@map("client")
+}
+
+model Feed {
+  id          String       @id @default(uuid())
+  type        FeedType
+  status      FeedStatus   @default(NEW)
+  actionCall  Boolean?     @default(false)
+  actionEmail Boolean?     @default(false)
+  actionBooking Boolean?   @default(false)
+  actionTask  Boolean?     @default(false)
+  metadata    String?
+
+  // Relations
+  clientId    String?
+  client      Client?      @relation(fields: [clientId], references: [id])
+  taskId      String?
+  task        Task?        @relation(fields: [taskId], references: [id])
+
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@map("feed")
+}
+
+enum FeedType {
+  RECOMMENDATION
+  CLIENT_ACTIVITY
+  INDUSTRY_INFO
+  COLLEAGUES_UPDATE
+}
+
+enum FeedStatus {
+  NEW
+  CANCELLED
+  IN_PROGRESS
+  ACTION_COMPLETED
+  CLOSED
 }
