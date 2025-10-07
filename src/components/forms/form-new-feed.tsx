@@ -1,4 +1,5 @@
 "use client"
+
 import { useForm } from "react-hook-form"
 import { useTransition, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -28,12 +29,10 @@ type ClientEditFormFields = {
   address?: string
 }
 
-export default function FormNewClientDialog({
-  userId,
+export default function FormNewFeedDialog({
   onSuccess,
-  triggerLabel = "Add New Client",
+  triggerLabel = "Add Feed Item (admin)",
 }: {
-  userId: string
   onSuccess: (t: Client) => void
   triggerLabel?: string
 }) {
@@ -55,7 +54,6 @@ export default function FormNewClientDialog({
     startTransition(async () => {
       const payload = {
         ...data,
-        createdById: userId,
       }
 
       try {
@@ -72,7 +70,7 @@ export default function FormNewClientDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="">
+        <Button variant="outline" className="">
           {triggerLabel}
         </Button>
       </DialogTrigger>

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { unauthorized } from "next/navigation"
-import { FeedStatus, type Feed } from "@/types/task-client"
+import { FeedStatus, type Feed, Client } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
 import FeedLoading from "./loading"
 import { Card, CardContent } from "@/components/ui/card"
@@ -19,12 +19,13 @@ import {
   MapPinHouse,
   AtSign,
   Phone,
-  CalendarCheck,
   ChevronsUp,
   ChevronsDown,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LikeButton } from "@/components/business/like-button"
+import FormNewTaskIconDialog from "@/components/forms/form-new-task-icon"
+import FormNewFeedDialog from "@/components/forms/form-new-feed"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -74,9 +75,10 @@ export default function FeedPage() {
       <div className="space-y-4">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Feed</h1>
+          <FormNewFeedDialog onSuccess={() => fetchFeed()} />
         </div>
 
-        <div className="flex flex-row items-center justify-between gap-3 px-4">
+        <div className="mb-4 flex flex-row items-center justify-between gap-3 px-4">
           <Select
             onValueChange={(value) =>
               setTypeFilter(value === "ALL" ? null : value)
@@ -142,6 +144,17 @@ export default function FeedPage() {
 
 function FeedCards({ feed }: { feed: Feed[] }) {
   const router = useRouter()
+  const { data: user } = useSession()
+
+  const [clients, setClients] = useState<Client[]>([])
+
+  const fetchClients = () => {
+    axiosApi.get("/api/client").then((res) => setClients(res.data))
+  }
+
+  useEffect(() => {
+    fetchClients()
+  }, [])
 
   const CARDS_PER_PAGE = 4
   const [page, setPage] = useState(1)
@@ -152,28 +165,31 @@ function FeedCards({ feed }: { feed: Feed[] }) {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="grid w-[95%] grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid w-[95%] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {pageFeed.map((feedItem) => (
           <Card key={feedItem.id} className="py-4">
             <CardContent className="flex flex-col gap-2 px-4 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
-                <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-xs">
-                  {feedItem.type.replace(/_/g, " ")}
-                </div>
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-sm">
+                    {feedItem.type.replace(/_/g, " ")}
+                  </div>
 
-                <div
-                  className={cn(
-                    "rounded-xl border-1 border-gray-300 px-2 py-1 text-xs",
-                    feedItem.status === "CANCELLED" && "text-gray-500",
-                    feedItem.status === "IN_PROGRESS" && "text-blue-500",
-                    feedItem.status === "ACTION_COMPLETED" && "text-green-400",
-                    feedItem.status === "CLOSED" && "text-green-700",
-                    feedItem.status === "NEW" && "text-orange-500",
-                  )}
-                >
-                  {feedItem.status
-                    .replace(/_/g, " ")
-                    .replace("ACTION COMPLETED", "ACTION OK")}
+                  <div
+                    className={cn(
+                      "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm",
+                      feedItem.status === "CANCELLED" && "text-gray-500",
+                      feedItem.status === "IN_PROGRESS" && "text-blue-500",
+                      feedItem.status === "ACTION_COMPLETED" &&
+                        "text-green-400",
+                      feedItem.status === "CLOSED" && "text-green-700",
+                      feedItem.status === "NEW" && "text-orange-500",
+                    )}
+                  >
+                    {feedItem.status
+                      .replace(/_/g, " ")
+                      .replace("ACTION COMPLETED", "ACTION OK")}
+                  </div>
                 </div>
 
                 <div className="flex flex-row items-center justify-start gap-3 text-xs text-gray-500">
@@ -206,14 +222,57 @@ function FeedCards({ feed }: { feed: Feed[] }) {
               </div>
 
               <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center justify-start gap-3">
+                <div className="flex flex-row items-center justify-start gap-2">
                   <span className="text-sm text-gray-400">Actions:</span>
-                  {feedItem.actionCall && <Phone size={24} />}
-                  {feedItem.actionEmail && <AtSign size={24} />}
-                  {feedItem.actionBooking && <MapPinHouse size={24} />}
-                  {!feedItem.taskId && feedItem.actionTask && (
-                    <CalendarCheck size={24} />
+                  {feedItem.actionCall && (
+                    <a
+                      href={`tel:${feedItem?.client?.phone ?? ""}`}
+                      onClick={(e) => {
+                        if (!feedItem?.client?.phone) e.preventDefault()
+                      }}
+                    >
+                      <Button variant="outline">
+                        <Phone size={24} />
+                      </Button>
+                    </a>
                   )}
+
+                  {feedItem.actionEmail && (
+                    <a
+                      href={`mailto:${feedItem?.client?.email ?? ""}`}
+                      onClick={(e) => {
+                        if (!feedItem?.client?.email) e.preventDefault()
+                      }}
+                    >
+                      <Button variant="outline">
+                        <AtSign size={24} />
+                      </Button>
+                    </a>
+                  )}
+
+                  {feedItem.actionBooking && (
+                    <Button variant="outline">
+                      <MapPinHouse size={24} />
+                    </Button>
+                  )}
+
+                  {user &&
+                    !feedItem.taskId &&
+                    feedItem.actionTask &&
+                    feedItem.type !== "COLLEAGUES_UPDATE" && (
+                      <FormNewTaskIconDialog
+                        clients={
+                          feedItem.clientId
+                            ? clients.filter(
+                                (client) => client.id === feedItem.clientId,
+                              )
+                            : clients
+                        }
+                        userId={user?.user.id}
+                        onSuccess={() => {}}
+                      />
+                    )}
+
                   {feedItem.type === "COLLEAGUES_UPDATE" && (
                     <LikeButton feedId={feedItem.id} />
                   )}

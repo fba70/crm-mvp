@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import axiosApi from "@/lib/axios"
 import { ThumbsUp } from "lucide-react"
+import { Button } from "@/components/ui/button"
 
 export function LikeButton({ feedId }: { feedId: string }) {
   const [likeCount, setLikeCount] = useState<number | null>(null)
@@ -23,9 +24,7 @@ export function LikeButton({ feedId }: { feedId: string }) {
   const handleLike = async () => {
     setIsLiking(true)
     try {
-      // Post a like
       await axiosApi.post(`/api/feed/${feedId}/like`)
-      // Fetch the updated like count
       const response = await axiosApi.get(`/api/feed/${feedId}/like`)
       setLikeCount(response.data.likeCount)
     } catch (error) {
@@ -36,22 +35,23 @@ export function LikeButton({ feedId }: { feedId: string }) {
   }
 
   return (
-    <div className="flex items-center gap-2">
-      <button
+    <div className="flex items-center gap-1">
+      <Button
         onClick={handleLike}
         disabled={isLiking}
-        className="flex items-center gap-1 text-blue-500 hover:text-blue-700 disabled:opacity-50"
+        variant="outline" // Use the appropriate variant for an outlined button
+        className="flex items-center gap-1"
       >
         <ThumbsUp className="text-green-500" />
         {isLiking ? (
-          <span className="text-sm">Liking...</span>
+          <span className="text-sm"> ...</span>
         ) : (
           <span className="text-sm text-green-600">Like</span>
         )}
-      </button>
-      {likeCount !== null && (
-        <span className="text-sm text-green-600">({likeCount} likes)</span>
-      )}
+        {likeCount !== null && (
+          <span className="text-sm text-green-600">( {likeCount} )</span>
+        )}
+      </Button>
     </div>
   )
 }

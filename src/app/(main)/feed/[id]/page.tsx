@@ -13,8 +13,8 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { LikeButton } from "@/components/business/like-button"
 import { StatusChangeDialog } from "@/components/business/feed-status-change"
-import { MapPinHouse, AtSign, Phone, CalendarCheck } from "lucide-react"
-import FormNewTaskDialog from "@/components/forms/form-new-task"
+import { MapPinHouse, AtSign, Phone } from "lucide-react"
+import FormNewTaskIconDialog from "@/components/forms/form-new-task-icon"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import axiosApi from "@/lib/axios"
@@ -134,32 +134,59 @@ export default function FeedItemPage() {
           <div className="flex flex-row items-center justify-between gap-2">
             <div className="flex flex-row items-center justify-start gap-3">
               <span className="w-[60px] text-sm text-gray-400">Actions:</span>
-              {feedItem.actionCall && <Phone size={24} />}
-              {feedItem.actionEmail && <AtSign size={24} />}
-              {feedItem.actionBooking && <MapPinHouse size={24} />}
-              {!feedItem.taskId && feedItem.actionTask && (
-                <CalendarCheck size={24} />
+              {feedItem.actionCall && (
+                <a
+                  href={`tel:${feedItem?.client?.phone ?? ""}`}
+                  onClick={(e) => {
+                    if (!feedItem?.client?.phone) e.preventDefault()
+                  }}
+                >
+                  <Button variant="outline">
+                    <Phone size={24} />
+                  </Button>
+                </a>
               )}
+
+              {feedItem.actionEmail && (
+                <a
+                  href={`mailto:${feedItem?.client?.email ?? ""}`}
+                  onClick={(e) => {
+                    if (!feedItem?.client?.email) e.preventDefault()
+                  }}
+                >
+                  <Button variant="outline">
+                    <AtSign size={24} />
+                  </Button>
+                </a>
+              )}
+
+              {feedItem.actionBooking && (
+                <Button variant="outline">
+                  <MapPinHouse size={24} />
+                </Button>
+              )}
+
+              {user &&
+                !feedItem.taskId &&
+                feedItem.actionTask &&
+                feedItem.type !== "COLLEAGUES_UPDATE" && (
+                  <FormNewTaskIconDialog
+                    clients={
+                      feedItem.clientId
+                        ? clients.filter(
+                            (client) => client.id === feedItem.clientId,
+                          )
+                        : clients
+                    }
+                    userId={user?.user.id}
+                    onSuccess={() => {}}
+                  />
+                )}
+
               {feedItem.type === "COLLEAGUES_UPDATE" && (
                 <LikeButton feedId={feedItem.id} />
               )}
             </div>
-
-            {user &&
-              !feedItem.taskId &&
-              feedItem.type !== "COLLEAGUES_UPDATE" && (
-                <FormNewTaskDialog
-                  clients={
-                    feedItem.clientId
-                      ? clients.filter(
-                          (client) => client.id === feedItem.clientId,
-                        )
-                      : clients
-                  }
-                  userId={user?.user.id}
-                  onSuccess={() => {}}
-                />
-              )}
 
             <StatusChangeDialog
               feedId={feedItem.id}
