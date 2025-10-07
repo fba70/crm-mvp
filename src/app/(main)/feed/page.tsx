@@ -75,7 +75,7 @@ export default function FeedPage() {
       <div className="space-y-4">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Feed</h1>
-          <FormNewFeedDialog onSuccess={() => fetchFeed()} />
+          {user && <FormNewFeedDialog onSuccess={() => fetchFeed()} />}
         </div>
 
         <div className="mb-4 flex flex-row items-center justify-between gap-3 px-4">

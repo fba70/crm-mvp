@@ -45,26 +45,27 @@ export default function ClientsPage() {
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Clients</h1>
           {user && (
             <FormNewClientDialog
-              clients={clients}
               userId={user?.user.id}
               onSuccess={() => fetchClients()}
             />
           )}
         </div>
 
-        <div className="ml-6 w-full">
-          <input
-            type="text"
-            placeholder="Search clients by name..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="rounded border px-4 py-2 text-sm"
-          />
+        <div className="mb-4 flex flex-row items-center justify-between gap-3 px-4">
+          <div className="ml-2 w-full">
+            <input
+              type="text"
+              placeholder="Search clients by name..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="rounded border px-4 py-2 text-sm"
+            />
+          </div>
         </div>
 
         {clients.length === 0 ? (
