@@ -68,3 +68,10 @@ export interface Feed {
   createdAt: Date
   updatedAt: Date
 }
+
+export interface Like {
+  id: string
+  userId: string
+  feedId: string
+  createdAt: Date
+}

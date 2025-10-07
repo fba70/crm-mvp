@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { unauthorized } from "next/navigation"
-import type { Feed } from "@/types/task-client"
+import { FeedStatus, type Feed } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
 import FeedLoading from "./loading"
 import { Card, CardContent } from "@/components/ui/card"
@@ -24,6 +24,7 @@ import {
   ChevronsDown,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { LikeButton } from "@/components/business/like-button"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -151,10 +152,10 @@ function FeedCards({ feed }: { feed: Feed[] }) {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="grid w-[90%] grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid w-[95%] grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {pageFeed.map((feedItem) => (
           <Card key={feedItem.id} className="py-4">
-            <CardContent className="flex flex-col gap-2 px-5 py-0">
+            <CardContent className="flex flex-col gap-2 px-4 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-xs">
                   {feedItem.type.replace(/_/g, " ")}
@@ -205,17 +206,45 @@ function FeedCards({ feed }: { feed: Feed[] }) {
               </div>
 
               <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center justify-start gap-5">
+                <div className="flex flex-row items-center justify-start gap-3">
                   <span className="text-sm text-gray-400">Actions:</span>
                   {feedItem.actionCall && <Phone size={24} />}
                   {feedItem.actionEmail && <AtSign size={24} />}
                   {feedItem.actionBooking && <MapPinHouse size={24} />}
-                  {feedItem.actionTask && <CalendarCheck size={24} />}
+                  {!feedItem.taskId && feedItem.actionTask && (
+                    <CalendarCheck size={24} />
+                  )}
+                  {feedItem.type === "COLLEAGUES_UPDATE" && (
+                    <LikeButton feedId={feedItem.id} />
+                  )}
                 </div>
 
-                <Button variant="default" onClick={() => {}}>
-                  Details
-                </Button>
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      router.push(`/feed/${feedItem.id}`)
+                    }}
+                  >
+                    Details
+                  </Button>
+
+                  <Button
+                    variant="default"
+                    onClick={async () => {
+                      try {
+                        await axiosApi.patch(`/api/feed/${feedItem.id}`, {
+                          status: FeedStatus.CLOSED,
+                        })
+                        feedItem.status = FeedStatus.CLOSED
+                      } catch (error) {
+                        console.error("Failed to close the feed item:", error)
+                      }
+                    }}
+                  >
+                    Close
+                  </Button>
+                </div>
               </div>
             </CardContent>
           </Card>

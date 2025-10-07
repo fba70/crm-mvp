@@ -25,6 +25,8 @@ model User {
   assignedTasks   Task[]    @relation("AssignedTasks")
   createdClients  Client[]  @relation("CreatedClients")
 
+  likes       Like[]
+
   @@unique([email])
   @@map("user")
 }
@@ -160,6 +162,8 @@ model Feed {
   taskId      String?
   task        Task?        @relation(fields: [taskId], references: [id])
 
+  likes       Like[]
+
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 
@@ -179,4 +183,18 @@ enum FeedStatus {
   IN_PROGRESS
   ACTION_COMPLETED
   CLOSED
+}
+
+model Like {
+  id        String   @id @default(uuid())
+  userId    String
+  feedId    String
+  createdAt DateTime @default(now())
+
+  // Relations
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  feed      Feed?    @relation(fields: [feedId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, feedId]) // Ensure a user can like a feed item only once
+  @@map("like")
 }
