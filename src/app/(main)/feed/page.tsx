@@ -15,9 +15,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import { MapPinHouse, AtSign, Phone, CalendarCheck } from "lucide-react"
+import {
+  MapPinHouse,
+  AtSign,
+  Phone,
+  CalendarCheck,
+  ChevronsUp,
+  ChevronsDown,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { format } from "date-fns"
+import { cn } from "@/lib/utils"
 
 export default function FeedPage() {
   const { data: user, isPending } = useSession()
@@ -30,6 +38,7 @@ export default function FeedPage() {
   const [feedLoading, setFeedLoading] = useState(true)
   const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
 
   const fetchFeed = () => {
     setFeedLoading(true)
@@ -49,24 +58,30 @@ export default function FeedPage() {
     return matchesType && matchesStatus
   })
 
-  console.log("Feed:", feed)
+  const sortedFilteredFeed = [...filteredFeed].sort((a, b) => {
+    const dateA = new Date(a.createdAt).getTime()
+    const dateB = new Date(b.createdAt).getTime()
+    return sortOrder === "asc" ? dateA - dateB : dateB - dateA
+  })
+
+  // console.log("Feed:", feed)
 
   if (feedLoading) return <FeedLoading />
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
-      <div className="space-y-6">
+      <div className="space-y-4">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Feed</h1>
         </div>
 
-        <div className="flex flex-row gap-4 px-4">
+        <div className="flex flex-row items-center justify-between gap-3 px-4">
           <Select
             onValueChange={(value) =>
               setTypeFilter(value === "ALL" ? null : value)
             }
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -85,7 +100,7 @@ export default function FeedPage() {
               setStatusFilter(value === "ALL" ? null : value)
             }
           >
-            <SelectTrigger className="w-48">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
@@ -97,14 +112,27 @@ export default function FeedPage() {
               <SelectItem value="CLOSED">Closed</SelectItem>
             </SelectContent>
           </Select>
+
+          <Button
+            variant="outline"
+            onClick={() =>
+              setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"))
+            }
+          >
+            {sortOrder === "asc" ? (
+              <ChevronsUp size={16} />
+            ) : (
+              <ChevronsDown size={16} />
+            )}
+          </Button>
         </div>
 
-        {filteredFeed.length === 0 ? (
+        {sortedFilteredFeed.length === 0 ? (
           <p className="text-muted-foreground py-8 text-center">
             No feed found.
           </p>
         ) : (
-          <FeedCards feed={filteredFeed} />
+          <FeedCards feed={sortedFilteredFeed} />
         )}
       </div>
     </main>
@@ -122,36 +150,38 @@ function FeedCards({ feed }: { feed: Feed[] }) {
   const pageFeed = feed.slice(startIdx, endIdx)
 
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="grid w-[90%] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+    <div className="flex flex-col items-center justify-center">
+      <div className="grid w-[90%] grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {pageFeed.map((feedItem) => (
-          <Card key={feedItem.id} className="pt-4 pb-4">
-            <CardContent className="flex flex-col gap-3 px-6 py-0">
+          <Card key={feedItem.id} className="py-4">
+            <CardContent className="flex flex-col gap-2 px-5 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
-                <div className="text-sm">
-                  <span className="pr-2 text-gray-400">Type:</span>
-                  {feedItem.type}
+                <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-xs">
+                  {feedItem.type.replace(/_/g, " ")}
                 </div>
-                <div className="text-sm">
-                  <span className="pr-2 text-gray-400">Status:</span>{" "}
-                  {feedItem.status}
+
+                <div
+                  className={cn(
+                    "rounded-xl border-1 border-gray-300 px-2 py-1 text-xs",
+                    feedItem.status === "CANCELLED" && "text-gray-500",
+                    feedItem.status === "IN_PROGRESS" && "text-blue-500",
+                    feedItem.status === "ACTION_COMPLETED" && "text-green-400",
+                    feedItem.status === "CLOSED" && "text-green-700",
+                    feedItem.status === "NEW" && "text-orange-500",
+                  )}
+                >
+                  {feedItem.status
+                    .replace(/_/g, " ")
+                    .replace("ACTION COMPLETED", "ACTION OK")}
                 </div>
-              </div>
-              <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center justify-start gap-3">
-                  <span className="text-sm text-gray-400">Actions:</span>
-                  {feedItem.actionCall && <Phone size={18} />}
-                  {feedItem.actionEmail && <AtSign size={18} />}
-                  {feedItem.actionBooking && <MapPinHouse size={18} />}
-                  {feedItem.actionTask && <CalendarCheck size={18} />}
-                </div>
-                <div className="flex flex-row items-center justify-start gap-4">
-                  <span className="text-sm text-gray-400">Date:</span>
+
+                <div className="flex flex-row items-center justify-start gap-3 text-xs text-gray-500">
                   {format(new Date(feedItem.createdAt), "yyyy-MM-dd")}
                 </div>
               </div>
-              <div className="flex flex-row items-center justify-between gap-2">
-                <div className="flex flex-row items-center justify-start gap-4">
+
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex flex-row items-center justify-start gap-3">
                   <span className="text-sm text-gray-400">Client:</span>
                   {feedItem.client ? (
                     <span>{feedItem.client.name || "—"}</span>
@@ -159,6 +189,7 @@ function FeedCards({ feed }: { feed: Feed[] }) {
                     <span>No client</span>
                   )}
                 </div>
+
                 {feedItem.taskId && (
                   <Button
                     variant="link"
@@ -168,9 +199,19 @@ function FeedCards({ feed }: { feed: Feed[] }) {
                       }
                     }}
                   >
-                    Task
+                    TASK
                   </Button>
                 )}
+              </div>
+
+              <div className="flex flex-row items-center justify-between gap-2">
+                <div className="flex flex-row items-center justify-start gap-5">
+                  <span className="text-sm text-gray-400">Actions:</span>
+                  {feedItem.actionCall && <Phone size={24} />}
+                  {feedItem.actionEmail && <AtSign size={24} />}
+                  {feedItem.actionBooking && <MapPinHouse size={24} />}
+                  {feedItem.actionTask && <CalendarCheck size={24} />}
+                </div>
 
                 <Button variant="default" onClick={() => {}}>
                   Details
@@ -182,7 +223,7 @@ function FeedCards({ feed }: { feed: Feed[] }) {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
+        <div className="mt-3 flex items-center justify-center gap-2">
           <button
             className="bg-muted text-foreground rounded px-3 py-1 disabled:opacity-50"
             onClick={() => setPage((p) => Math.max(1, p - 1))}
