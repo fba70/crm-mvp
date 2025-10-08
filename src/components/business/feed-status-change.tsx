@@ -50,7 +50,7 @@ export function StatusChangeDialog({
   return (
     <>
       <Button variant="default" onClick={() => setIsOpen(true)}>
-        Change Status
+        Status
       </Button>
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
         <DialogContent>

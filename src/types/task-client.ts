@@ -61,10 +61,11 @@ export interface Feed {
   actionBooking?: boolean
   actionTask?: boolean
   metadata?: string
+  feedback?: string
   clientId?: string
-  client?: Client // Assuming Client is defined elsewhere
+  client?: Client
   taskId?: string
-  task?: Task // Assuming Task is defined elsewhere
+  task?: Task
   createdAt: Date
   updatedAt: Date
 }

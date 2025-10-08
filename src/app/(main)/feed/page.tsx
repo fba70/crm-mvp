@@ -21,6 +21,7 @@ import {
   Phone,
   ChevronsUp,
   ChevronsDown,
+  Check,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LikeButton } from "@/components/business/like-button"
@@ -78,7 +79,7 @@ export default function FeedPage() {
           {user && <FormNewFeedDialog onSuccess={() => fetchFeed()} />}
         </div>
 
-        <div className="mb-4 flex flex-row items-center justify-between gap-3 px-4">
+        <div className="mb-3 flex flex-row items-center justify-between gap-3 px-4">
           <Select
             onValueChange={(value) =>
               setTypeFilter(value === "ALL" ? null : value)
@@ -165,7 +166,7 @@ function FeedCards({ feed }: { feed: Feed[] }) {
 
   return (
     <div className="flex flex-col items-center justify-center">
-      <div className="grid w-[95%] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid w-[95%] grid-cols-1 gap-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {pageFeed.map((feedItem) => (
           <Card key={feedItem.id} className="py-4">
             <CardContent className="flex flex-col gap-2 px-4 py-0">
@@ -198,7 +199,7 @@ function FeedCards({ feed }: { feed: Feed[] }) {
               </div>
 
               <div className="flex flex-row items-center justify-between">
-                <div className="flex flex-row items-center justify-start gap-3">
+                <div className="flex flex-row items-center justify-start gap-3 py-2">
                   <span className="text-sm text-gray-400">Client:</span>
                   {feedItem.client ? (
                     <span>{feedItem.client.name || "—"}</span>
@@ -301,7 +302,7 @@ function FeedCards({ feed }: { feed: Feed[] }) {
                       }
                     }}
                   >
-                    Close
+                    <Check />
                   </Button>
                 </div>
               </div>

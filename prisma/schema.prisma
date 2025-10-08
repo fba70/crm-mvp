@@ -147,25 +147,26 @@ model Client {
 }
 
 model Feed {
-  id          String       @id @default(uuid())
-  type        FeedType
-  status      FeedStatus   @default(NEW)
-  actionCall  Boolean?     @default(false)
-  actionEmail Boolean?     @default(false)
-  actionBooking Boolean?   @default(false)
-  actionTask  Boolean?     @default(false)
-  metadata    String?
+  id            String       @id @default(uuid())
+  type          FeedType
+  status        FeedStatus   @default(NEW)
+  actionCall    Boolean?     @default(false)
+  actionEmail   Boolean?     @default(false)
+  actionBooking Boolean?     @default(false)
+  actionTask    Boolean?     @default(false)
+  metadata      String?
+  feedback      String?
 
   // Relations
-  clientId    String?
-  client      Client?      @relation(fields: [clientId], references: [id])
-  taskId      String?
-  task        Task?        @relation(fields: [taskId], references: [id])
+  clientId      String?
+  client        Client?      @relation(fields: [clientId], references: [id])
+  taskId        String?
+  task          Task?        @relation(fields: [taskId], references: [id])
 
-  likes       Like[]
+  likes         Like[]
 
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
 
   @@map("feed")
 }

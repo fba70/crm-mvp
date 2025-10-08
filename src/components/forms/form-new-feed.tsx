@@ -1,9 +1,8 @@
 "use client"
 
 import { useForm } from "react-hook-form"
-import { useTransition, useState } from "react"
+import { useTransition, useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Form,
   FormField,
@@ -19,50 +18,73 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { Client } from "@/types/task-client"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
+import { Textarea } from "@/components/ui/textarea"
+import type { Client, Feed } from "@/types/task-client"
+import { FeedType, FeedStatus } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
-
-type ClientEditFormFields = {
-  name: string
-  email?: string
-  phone?: string
-  address?: string
-}
 
 export default function FormNewFeedDialog({
   onSuccess,
   triggerLabel = "Add Feed Item (admin)",
 }: {
-  onSuccess: (t: Client) => void
+  onSuccess: (t: Feed) => void
   triggerLabel?: string
 }) {
-  const form = useForm<ClientEditFormFields>({
+  const form = useForm<Feed>({
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
+      type: FeedType.RECOMMENDATION,
+      status: FeedStatus.NEW,
+      actionCall: false,
+      actionEmail: false,
+      actionBooking: false,
+      actionTask: false,
+      metadata: "",
+      clientId: "",
+      taskId: undefined,
     },
   })
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [clients, setClients] = useState<Client[]>([])
 
-  const onSubmit = (data: ClientEditFormFields) => {
+  useEffect(() => {
+    const fetchClients = async () => {
+      try {
+        const response = await axiosApi.get("/api/client")
+        setClients(response.data)
+      } catch (err) {
+        console.error("Failed to fetch clients:", err)
+      }
+    }
+
+    fetchClients()
+  }, [])
+
+  const onSubmit = (data: Feed) => {
     setError(null)
     startTransition(async () => {
       const payload = {
         ...data,
+        taskId: undefined,
       }
 
       try {
-        const res = await axiosApi.post(`/api/client/`, payload)
+        const res = await axiosApi.post(`/api/feed/`, payload)
         onSuccess(res.data)
         setOpen(false)
       } catch (err) {
-        console.log("Client create error", err)
-        setError("Failed to create client")
+        console.log("Feed create error", err)
+        setError("Failed to create feed")
       }
     })
   }
@@ -86,12 +108,26 @@ export default function FormNewFeedDialog({
           >
             <FormField
               control={form.control}
-              name="name"
+              name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Client Name</FormLabel>
+                  <FormLabel className="text-gray-500">Type</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(FeedType).map((type) => (
+                          <SelectItem key={type} value={type}>
+                            {type.replace(/_/g, " ")}{" "}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -99,38 +135,146 @@ export default function FormNewFeedDialog({
             />
             <FormField
               control={form.control}
-              name="email"
+              name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Email</FormLabel>
+                  <FormLabel className="text-gray-500">Status</FormLabel>
                   <FormControl>
-                    <Input type="email" {...field} />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a status" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Object.values(FeedStatus).map((status) => (
+                          <SelectItem key={status} value={status}>
+                            {status.replace(/_/g, " ")}{" "}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+            <div className="flex flex-row gap-12">
+              <div className="flex flex-col gap-2">
+                <FormField
+                  control={form.control}
+                  name="actionCall"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-gray-500">
+                        Action Call
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="actionEmail"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-gray-500">
+                        Action Email
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+              <div className="flex flex-col gap-2">
+                <FormField
+                  control={form.control}
+                  name="actionBooking"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-gray-500">
+                        Action Booking
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="actionTask"
+                  render={({ field }) => (
+                    <FormItem className="flex flex-row items-center space-y-0 space-x-3">
+                      <FormControl>
+                        <Checkbox
+                          checked={field.value}
+                          onCheckedChange={field.onChange}
+                        />
+                      </FormControl>
+                      <FormLabel className="text-gray-500">
+                        Action Task
+                      </FormLabel>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
             <FormField
               control={form.control}
-              name="phone"
+              name="clientId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Phone</FormLabel>
+                  <FormLabel className="text-gray-500">Client</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
+                      <SelectTrigger className="w-full">
+                        <SelectValue placeholder="Select a client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              name="address"
+              name="metadata"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Address</FormLabel>
+                  <FormLabel className="text-gray-500">Feed Info</FormLabel>
                   <FormControl>
-                    <Input {...field} />
+                    <Textarea
+                      {...field}
+                      placeholder="Enter feed info here..."
+                      rows={4}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
