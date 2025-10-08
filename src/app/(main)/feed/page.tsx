@@ -15,18 +15,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import {
-  MapPinHouse,
-  AtSign,
-  Phone,
-  ChevronsUp,
-  ChevronsDown,
-  Check,
-} from "lucide-react"
+import { AtSign, Phone, ChevronsUp, ChevronsDown, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LikeButton } from "@/components/business/like-button"
 import FormNewTaskIconDialog from "@/components/forms/form-new-task-icon"
 import FormNewFeedDialog from "@/components/forms/form-new-feed"
+import BookingRequestDialog from "@/components/forms/form-booking-request"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 
@@ -252,9 +246,10 @@ function FeedCards({ feed }: { feed: Feed[] }) {
                   )}
 
                   {feedItem.actionBooking && (
-                    <Button variant="outline">
-                      <MapPinHouse size={24} />
-                    </Button>
+                    <BookingRequestDialog
+                      feedId={feedItem.id}
+                      onSuccess={() => {}}
+                    />
                   )}
 
                   {user &&

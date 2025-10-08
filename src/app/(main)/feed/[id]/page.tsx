@@ -14,11 +14,12 @@ import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { LikeButton } from "@/components/business/like-button"
 import { StatusChangeDialog } from "@/components/business/feed-status-change"
-import { MapPinHouse, AtSign, Phone } from "lucide-react"
+import { AtSign, Phone } from "lucide-react"
 import FormNewTaskIconDialog from "@/components/forms/form-new-task-icon"
+import BookingRequestDialog from "@/components/forms/form-booking-request"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
-import axiosApi from "@/lib/axios"
+import { toast } from "sonner"
 
 export default function FeedItemPage() {
   const params = useParams()
@@ -35,7 +36,7 @@ export default function FeedItemPage() {
   const [isLoading, setIsLoading] = useState(false)
 
   const fetchClients = () => {
-    axiosApi.get("/api/client").then((res) => setClients(res.data))
+    axios.get("/api/client").then((res) => setClients(res.data))
   }
 
   useEffect(() => {
@@ -60,15 +61,42 @@ export default function FeedItemPage() {
 
   const handleOpenAICall = async () => {
     setIsLoading(true)
-    setResponse("") // Clear previous response
+    setResponse("")
+
     try {
-      const systemPrompt =
+      const systemPromptClientActivity =
         "You are a helpful assistant providing insights for sales team members based on input from client activity feed." +
         "Client is:" +
         (feedItem?.client?.name ?? "No client provided.") +
         ".Client activity message is: " +
         (feedItem?.metadata ?? "No message provided.") +
         ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Keep the response under 100 words."
+
+      const systemPromptIndustryInfo =
+        "You are a helpful assistant providing insights for sales team members based on input from client activity feed." +
+        "Client is:" +
+        (feedItem?.client?.name ?? "No client provided.") +
+        ".Client activity message is: " +
+        (feedItem?.metadata ?? "No message provided.") +
+        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Keep the response under 100 words."
+
+      const systemPromptRecommendations =
+        "You are a helpful assistant providing insights for sales team members based on input from client activity feed." +
+        "Client is:" +
+        (feedItem?.client?.name ?? "No client provided.") +
+        ".Client activity message is: " +
+        (feedItem?.metadata ?? "No message provided.") +
+        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Keep the response under 100 words."
+
+      let systemPrompt = ""
+
+      if (feedItem?.type === "CLIENT_ACTIVITY") {
+        systemPrompt = systemPromptClientActivity
+      } else if (feedItem?.type === "INDUSTRY_INFO") {
+        systemPrompt = systemPromptIndustryInfo
+      } else if (feedItem?.type === "RECOMMENDATION") {
+        systemPrompt = systemPromptRecommendations
+      }
 
       const fullPrompt = `${systemPrompt}\n\nUser: ${userPrompt}`
 
@@ -85,7 +113,7 @@ export default function FeedItemPage() {
       }
 
       const data = await res.json()
-      console.log("AI response:", data.result)
+      // console.log("AI response:", data.result)
       setResponse(data.result.output_text)
     } catch (error) {
       console.error("Error calling OpenAI API:", error)
@@ -120,23 +148,25 @@ export default function FeedItemPage() {
         <Card className="mx-auto mt-6 flex w-[95%] flex-col py-4">
           <CardContent className="flex flex-col gap-2 px-5 py-0">
             <div className="flex flex-row items-center justify-between gap-2">
-              <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-xs">
-                {feedItem.type.replace(/_/g, " ")}
-              </div>
+              <div className="flex flex-row items-center justify-center gap-2">
+                <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-xs">
+                  {feedItem.type.replace(/_/g, " ")}
+                </div>
 
-              <div
-                className={cn(
-                  "rounded-xl border-1 border-gray-300 px-2 py-1 text-xs",
-                  feedItem.status === "CANCELLED" && "text-gray-500",
-                  feedItem.status === "IN_PROGRESS" && "text-blue-500",
-                  feedItem.status === "ACTION_COMPLETED" && "text-green-400",
-                  feedItem.status === "CLOSED" && "text-green-700",
-                  feedItem.status === "NEW" && "text-orange-500",
-                )}
-              >
-                {feedItem.status
-                  .replace(/_/g, " ")
-                  .replace("ACTION COMPLETED", "ACTION OK")}
+                <div
+                  className={cn(
+                    "rounded-xl border-1 border-gray-300 px-2 py-1 text-xs",
+                    feedItem.status === "CANCELLED" && "text-gray-500",
+                    feedItem.status === "IN_PROGRESS" && "text-blue-500",
+                    feedItem.status === "ACTION_COMPLETED" && "text-green-400",
+                    feedItem.status === "CLOSED" && "text-green-700",
+                    feedItem.status === "NEW" && "text-orange-500",
+                  )}
+                >
+                  {feedItem.status
+                    .replace(/_/g, " ")
+                    .replace("ACTION COMPLETED", "ACTION OK")}
+                </div>
               </div>
 
               <div className="flex flex-row items-center justify-start gap-3 text-xs text-gray-500">
@@ -175,7 +205,7 @@ export default function FeedItemPage() {
 
             <div className="flex flex-row items-center justify-start gap-3">
               <span className="w-[60px] text-sm text-gray-400">Assistant:</span>
-              <span className="text-xs">
+              <span className="block max-h-20 overflow-y-auto text-sm">
                 {feedItem.feedback || "No message"}
               </span>
             </div>
@@ -210,9 +240,10 @@ export default function FeedItemPage() {
                 )}
 
                 {feedItem.actionBooking && (
-                  <Button variant="outline">
-                    <MapPinHouse size={24} />
-                  </Button>
+                  <BookingRequestDialog
+                    feedId={feedItem.id}
+                    onSuccess={() => {}}
+                  />
                 )}
 
                 {user &&
@@ -256,56 +287,64 @@ export default function FeedItemPage() {
           </CardContent>
         </Card>
 
-        <Card className="mx-auto mt-4 flex w-[95%] flex-col py-4">
-          <CardContent className="flex flex-col gap-2 px-5 py-0">
-            <p className="text-sm text-gray-500">
-              You can ask AI-assistant to provide inputs and recommendations
-              within the context of the client activity event. Please specify
-              your request to AI-assistant here:
-            </p>
+        {(feedItem.type === "RECOMMENDATION" ||
+          feedItem.type === "CLIENT_ACTIVITY" ||
+          feedItem.type === "INDUSTRY_INFO") && (
+          <Card className="mx-auto mt-4 flex w-[95%] flex-col py-4">
+            <CardContent className="flex flex-col gap-2 px-5 py-0">
+              <p className="text-sm text-gray-500">
+                You can ask AI-assistant to provide inputs and recommendations
+                within the context of the client activity event. Please specify
+                your request to AI-assistant here:
+              </p>
 
-            <Textarea
-              className="w-full rounded-md border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-              rows={4}
-              placeholder="Enter your prompt here..."
-              value={userPrompt}
-              onChange={(e) => setUserPrompt(e.target.value)}
-            />
-            <Button
-              variant="default"
-              className="mt-2"
-              onClick={handleOpenAICall}
-              disabled={isLoading}
-            >
-              {isLoading ? "Processing..." : "Submit Request"}
-            </Button>
-            {response && (
-              <div className="mt-3 rounded-md border border-gray-300 p-3">
-                <p className="text-sm text-gray-700">AI-assistant response:</p>
-                <p className="text-sm text-gray-900">{response}</p>
-                <Button
-                  variant="default"
-                  className="mt-3 w-full"
-                  onClick={async () => {
-                    try {
-                      await axios.patch(`/api/feed/${feedItem.id}`, {
-                        feedback: response,
-                      })
-                      alert(
-                        "Recommendation saved successfully to the feed item!",
-                      )
-                    } catch (error) {
-                      console.error("Failed to save recommendation", error)
-                      alert("Failed to save recommendation. Please try again.")
-                    }
-                  }}
-                >
-                  Save Recommendation
-                </Button>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+              <Textarea
+                className="w-full rounded-md border border-gray-300 p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                rows={4}
+                placeholder="Enter your request details here..."
+                value={userPrompt}
+                onChange={(e) => setUserPrompt(e.target.value)}
+              />
+              <Button
+                variant="default"
+                className="mt-2"
+                onClick={handleOpenAICall}
+                disabled={isLoading}
+              >
+                {isLoading ? "Processing..." : "Submit Request"}
+              </Button>
+              {response && (
+                <div className="mt-3 rounded-md border border-gray-300 p-3">
+                  <p className="text-sm text-gray-700">
+                    AI-assistant response:
+                  </p>
+                  <p className="text-sm text-gray-900">{response}</p>
+                  <Button
+                    variant="default"
+                    className="mt-3 w-full"
+                    onClick={async () => {
+                      try {
+                        await axios.patch(`/api/feed/${feedItem.id}`, {
+                          feedback: response,
+                        })
+                        toast.success(
+                          "Recommendation saved successfully to the feed item!",
+                        )
+                      } catch (error) {
+                        console.error("Failed to save recommendation", error)
+                        toast.error(
+                          "Failed to save recommendation. Please try again.",
+                        )
+                      }
+                    }}
+                  >
+                    Save Recommendation
+                  </Button>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
       </div>
     </main>
   )

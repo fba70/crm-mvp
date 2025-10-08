@@ -62,6 +62,7 @@ export interface Feed {
   actionTask?: boolean
   metadata?: string
   feedback?: string
+  feedbackBooking?: string
   clientId?: string
   client?: Client
   taskId?: string

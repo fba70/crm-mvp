@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/select"
 import axios from "axios"
 import { FeedStatus } from "@/types/task-client"
+import { toast } from "sonner"
 
 export function StatusChangeDialog({
   feedId,
@@ -38,10 +39,12 @@ export function StatusChangeDialog({
     setIsSubmitting(true)
     try {
       await axios.patch(`/api/feed/${feedId}`, { status: newStatus })
-      onStatusChange(newStatus) // Trigger the callback to update the local state
+      onStatusChange(newStatus)
       setIsOpen(false)
+      toast.success("Status updated successfully!")
     } catch (error) {
       console.error("Failed to update status:", error)
+      toast.error("Failed to update status. Please try again.")
     } finally {
       setIsSubmitting(false)
     }

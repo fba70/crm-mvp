@@ -156,6 +156,7 @@ model Feed {
   actionTask    Boolean?     @default(false)
   metadata      String?
   feedback      String?
+  feedbackBooking String?
 
   // Relations
   clientId      String?
