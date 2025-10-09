@@ -34,6 +34,7 @@ export default function FeedItemPage() {
   const [userPrompt, setUserPrompt] = useState("")
   const [response, setResponse] = useState("")
   const [isLoading, setIsLoading] = useState(false)
+  const [feedItemRefresh, setFeedItemRefresh] = useState(false)
 
   const fetchClients = () => {
     axios.get("/api/client").then((res) => setClients(res.data))
@@ -57,7 +58,7 @@ export default function FeedItemPage() {
     }
 
     fetchFeedItem()
-  }, [id])
+  }, [id, feedItemRefresh])
 
   const handleOpenAICall = async () => {
     setIsLoading(true)
@@ -109,14 +110,14 @@ export default function FeedItemPage() {
       })
 
       if (!res.ok) {
-        throw new Error("Failed to fetch OpenAI response")
+        throw new Error("Failed to fetch LLM response")
       }
 
       const data = await res.json()
       // console.log("AI response:", data.result)
       setResponse(data.result.output_text)
     } catch (error) {
-      console.error("Error calling OpenAI API:", error)
+      console.error("Error calling LLM API:", error)
       setResponse("An error occurred while processing your request.")
     } finally {
       setIsLoading(false)
@@ -200,15 +201,30 @@ export default function FeedItemPage() {
 
             <div className="flex flex-row items-center justify-start gap-3">
               <span className="w-[60px] text-sm text-gray-400">Message:</span>
-              <span>{feedItem.metadata || "No message"}</span>
-            </div>
-
-            <div className="flex flex-row items-center justify-start gap-3">
-              <span className="w-[60px] text-sm text-gray-400">Assistant:</span>
-              <span className="block max-h-20 overflow-y-auto text-sm">
-                {feedItem.feedback || "No message"}
+              <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
+                {feedItem.metadata || "No message"}
               </span>
             </div>
+
+            {feedItem.feedback && (
+              <div className="flex flex-row items-center justify-start gap-4">
+                <span className="w-[60px] text-sm text-gray-400">
+                  Assistant:
+                </span>
+                <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
+                  {feedItem.feedback || "No message"}
+                </span>
+              </div>
+            )}
+
+            {feedItem.feedbackBooking && (
+              <div className="flex flex-row items-center justify-start gap-4">
+                <span className="w-[60px] text-sm text-gray-400">Booking:</span>
+                <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
+                  {feedItem.feedbackBooking || "No message"}
+                </span>
+              </div>
+            )}
 
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-row items-center justify-start gap-3">
@@ -242,7 +258,7 @@ export default function FeedItemPage() {
                 {feedItem.actionBooking && (
                   <BookingRequestDialog
                     feedId={feedItem.id}
-                    onSuccess={() => {}}
+                    onSuccess={() => setFeedItemRefresh(true)}
                   />
                 )}
 

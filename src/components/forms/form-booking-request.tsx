@@ -38,6 +38,8 @@ type BookingRequestFormFields = {
   datesTo: string
   country: string
   city: string
+  departureCountry: string
+  departureCity: string
   travelOption: string
   isHotelRequired: boolean
   otherPreferences: string
@@ -57,6 +59,8 @@ export default function BookingRequestDialog({
       datesTo: "",
       country: "Austria",
       city: "",
+      departureCountry: "Austria",
+      departureCity: "",
       travelOption: "Plane",
       isHotelRequired: false,
       otherPreferences: "",
@@ -66,27 +70,70 @@ export default function BookingRequestDialog({
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [feedbackBooking, setFeedbackBooking] = useState<string | null>("")
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
+  const transformBookingData = (data: BookingRequestFormFields): string => {
+    const bookingRequirements = [
+      `Number of Travellers: ${data.travellersNumber}`,
+      `Travel Dates: From ${data.datesFrom} to ${data.datesTo}`,
+      `Departure Country: ${data.departureCountry}`,
+      `Departure City: ${data.departureCity}`,
+      `Destination Country: ${data.country}`,
+      `Destination City: ${data.city}`,
+      `Travel Option: ${data.travelOption}`,
+      `Hotel Required: ${data.isHotelRequired ? "Yes" : "No"}`,
+      `Other Preferences: ${data.otherPreferences || "None"}`,
+    ]
+
+    return bookingRequirements.join("\n")
+  }
 
   const onSubmit = (data: BookingRequestFormFields) => {
     setError(null)
+    setIsSubmitting(true)
+
+    const bookingPrompt =
+      "You are a travel agent. Please assist with the following booking requirements:\n\n" +
+      transformBookingData(data) +
+      "\n\nPlease provide suitable travel options including transportation and accommodation details if required. Do not search for real data, just emulate the response providing 3 options in a structured format."
+
     startTransition(async () => {
-      const payload = {
-        ...data,
-      }
-
-      // Assemble prompt
-      // Call openAI to emulate booking request answer in a structured format
-      // Save the result to the feed item as below
-
       try {
+        const openAIResponse = await axios.post(
+          "/api/openai/",
+          {
+            prompt: bookingPrompt,
+          },
+          {
+            headers: {
+              "Content-Type": "application/json",
+            },
+          },
+        )
+
+        if (!openAIResponse.data || !openAIResponse.data.result) {
+          toast.error("Error getting booking options from LLM")
+          setError("Error getting booking options from LLM")
+        }
+
+        const feedback = openAIResponse.data.result.output_text
+        setFeedbackBooking(feedback)
+        // console.log("LLM feedback:", openAIResponse.data.result.output_text)
+
+        const payload = {
+          feedbackBooking: openAIResponse.data.result.output_text,
+        }
+
         const res = await axios.patch(`/api/feed/${feedId}`, payload)
         onSuccess(res.data)
-        setOpen(false)
         toast.success("Booking options are saved!")
       } catch (err) {
-        console.log("Client create error", err)
-        setError("Failed to create client")
-        toast.error("Failed to save booking options")
+        console.log("Error during booking request processing", err)
+        setError("Failed to process booking request")
+        toast.error("Failed to process booking request")
+      } finally {
+        setIsSubmitting(false)
       }
     })
   }
@@ -188,37 +235,73 @@ export default function BookingRequestDialog({
               />
             </div>
 
-            <FormField
-              control={form.control}
-              name="country"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">
-                    Destination Country
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex flex-row items-center justify-between gap-2">
+              <FormField
+                control={form.control}
+                name="departureCountry"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Departure Country
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <FormField
-              control={form.control}
-              name="city"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">
-                    Destination City
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+              <FormField
+                control={form.control}
+                name="country"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Destination Country
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <div className="flex flex-row items-center justify-between gap-2">
+              <FormField
+                control={form.control}
+                name="departureCity"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Departure City
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="city"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Destination City
+                    </FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
 
             <FormField
               control={form.control}
@@ -256,7 +339,7 @@ export default function BookingRequestDialog({
                   <FormControl>
                     <Textarea
                       {...field}
-                      placeholder="Provide any other preferences"
+                      placeholder="Provide any other preferences..."
                       className="resize-none"
                     />
                   </FormControl>
@@ -265,20 +348,49 @@ export default function BookingRequestDialog({
               )}
             />
 
+            {/* Feedback Field */}
+            {feedbackBooking && (
+              <FormItem>
+                <FormLabel className="text-gray-500">
+                  AI-assistant booking options:
+                </FormLabel>
+                <FormControl>
+                  <Textarea
+                    value={feedbackBooking}
+                    readOnly
+                    rows={4}
+                    className="max-h-45 resize-none overflow-y-auto"
+                  />
+                </FormControl>
+              </FormItem>
+            )}
+
             {error && <div className="text-sm text-red-500">{error}</div>}
 
             <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Submitting..." : "Submit"}
-              </Button>
+              {!feedbackBooking ? (
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSubmitting || isPending}>
+                    {isSubmitting ? "Submitting..." : "Submit"}
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  type="button"
+                  variant="default"
+                  onClick={() => setOpen(false)}
+                >
+                  OK
+                </Button>
+              )}
             </div>
           </form>
         </Form>
