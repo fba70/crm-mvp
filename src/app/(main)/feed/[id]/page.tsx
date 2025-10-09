@@ -275,7 +275,12 @@ export default function FeedItemPage() {
                           : clients
                       }
                       userId={user?.user.id}
-                      onSuccess={() => {}}
+                      onSuccess={(newTask) => {
+                        setFeed((prevFeedItem) => {
+                          if (!prevFeedItem) return null
+                          return { ...prevFeedItem, taskId: newTask.id }
+                        })
+                      }}
                     />
                   )}
 

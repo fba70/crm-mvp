@@ -18,7 +18,7 @@ export default function DashboardPage() {
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
       <div className="space-y-4">
         <div className="flex flex-row justify-between px-4">
-          <h1 className="text-2xl font-semibold">Task Transitions</h1>
+          <h1 className="pl-2 text-2xl font-semibold">Task Transitions</h1>
         </div>
       </div>
     </main>

@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
+import { Checkbox } from "@/components/ui/checkbox"
 import { AtSign, Phone, ChevronsUp, ChevronsDown, Check } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LikeButton } from "@/components/business/like-button"
@@ -36,6 +37,7 @@ export default function FeedPage() {
   const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
+  const [includeClosed, setIncludeClosed] = useState(false)
 
   const fetchFeed = () => {
     setFeedLoading(true)
@@ -52,7 +54,8 @@ export default function FeedPage() {
   const filteredFeed = feed.filter((item) => {
     const matchesType = typeFilter ? item.type === typeFilter : true
     const matchesStatus = statusFilter ? item.status === statusFilter : true
-    return matchesType && matchesStatus
+    const includeClosedFilter = includeClosed || item.status !== "CLOSED"
+    return matchesType && matchesStatus && includeClosedFilter
   })
 
   const sortedFilteredFeed = [...filteredFeed].sort((a, b) => {
@@ -70,6 +73,20 @@ export default function FeedPage() {
       <div className="space-y-4">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Feed</h1>
+
+          <div className="flex items-center">
+            <Checkbox
+              id="includeClosed"
+              checked={includeClosed}
+              onCheckedChange={(checked) => setIncludeClosed(!!checked)}
+            />
+            <label
+              htmlFor="includeClosed"
+              className="ml-2 text-sm text-gray-600"
+            >
+              Include closed
+            </label>
+          </div>
           {user && <FormNewFeedDialog onSuccess={() => fetchFeed()} />}
         </div>
 
@@ -130,14 +147,20 @@ export default function FeedPage() {
             No feed found.
           </p>
         ) : (
-          <FeedCards feed={sortedFilteredFeed} />
+          <FeedCards feed={sortedFilteredFeed} setFeed={setFeed} />
         )}
       </div>
     </main>
   )
 }
 
-function FeedCards({ feed }: { feed: Feed[] }) {
+function FeedCards({
+  feed,
+  setFeed,
+}: {
+  feed: Feed[]
+  setFeed: React.Dispatch<React.SetStateAction<Feed[]>>
+}) {
   const router = useRouter()
   const { data: user } = useSession()
 
@@ -150,6 +173,14 @@ function FeedCards({ feed }: { feed: Feed[] }) {
   useEffect(() => {
     fetchClients()
   }, [])
+
+  const updateFeedItem = (id: string, updatedFields: Partial<Feed>) => {
+    setFeed((prevFeed) =>
+      prevFeed.map((item) =>
+        item.id === id ? { ...item, ...updatedFields } : item,
+      ),
+    )
+  }
 
   const CARDS_PER_PAGE = 4
   const [page, setPage] = useState(1)
@@ -265,7 +296,9 @@ function FeedCards({ feed }: { feed: Feed[] }) {
                             : clients
                         }
                         userId={user?.user.id}
-                        onSuccess={() => {}}
+                        onSuccess={(newTask) => {
+                          updateFeedItem(feedItem.id, { taskId: newTask.id })
+                        }}
                       />
                     )}
 
@@ -291,7 +324,10 @@ function FeedCards({ feed }: { feed: Feed[] }) {
                         await axiosApi.patch(`/api/feed/${feedItem.id}`, {
                           status: FeedStatus.CLOSED,
                         })
-                        feedItem.status = FeedStatus.CLOSED
+                        // feedItem.status = FeedStatus.CLOSED
+                        updateFeedItem(feedItem.id, {
+                          status: FeedStatus.CLOSED,
+                        })
                       } catch (error) {
                         console.error("Failed to close the feed item:", error)
                       }

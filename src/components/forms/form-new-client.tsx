@@ -31,11 +31,9 @@ type ClientEditFormFields = {
 export default function FormNewClientDialog({
   userId,
   onSuccess,
-  triggerLabel = "Add New Client",
 }: {
   userId: string
   onSuccess: (t: Client) => void
-  triggerLabel?: string
 }) {
   const form = useForm<ClientEditFormFields>({
     defaultValues: {
@@ -72,8 +70,8 @@ export default function FormNewClientDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="">
-          {triggerLabel}
+        <Button variant="outline" className="">
+          Add New Client (admin)
         </Button>
       </DialogTrigger>
       <DialogContent>

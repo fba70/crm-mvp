@@ -63,7 +63,7 @@ export default function ClientsPage() {
               placeholder="Search clients by name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="rounded border px-4 py-2 text-sm"
+              className="w-[380px] rounded border px-4 py-2 text-sm"
             />
           </div>
         </div>

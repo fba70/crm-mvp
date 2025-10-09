@@ -104,41 +104,31 @@ export default function TaskPage() {
             <CardDescription>{task.theme || "No theme"}</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-2">
+            <div className="mb-4 grid grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2">
               <span className="pr-2 text-sm text-gray-500">Client:</span>
-              <span className="text-lg font-semibold">
-                {task.client?.name || "—"}
-              </span>
+              <span className="text-lg">{task.client?.name || "—"}</span>
 
               <span className="pr-2 text-sm text-gray-500">Due date:</span>
-              <span className="text-lg font-semibold">
+              <span className="text-lg">
                 {task.date ? format(new Date(task.date), "dd.MM.yyyy") : "—"}
               </span>
 
               <span className="pr-2 text-sm text-gray-500">
                 Contact Person:
               </span>
-              <span className="text-lg font-semibold">
-                {task.contactPerson || "—"}
-              </span>
+              <span className="text-lg">{task.contactPerson || "—"}</span>
 
               <span className="pr-2 text-sm text-gray-500">Contact Email:</span>
-              <span className="text-lg font-semibold">
-                {task.contactEmail || "—"}
-              </span>
+              <span className="text-lg">{task.contactEmail || "—"}</span>
 
               <span className="pr-2 text-sm text-gray-500">Contact Phone:</span>
-              <span className="text-lg font-semibold">
-                {task.contactPhone || "—"}
-              </span>
+              <span className="text-lg">{task.contactPhone || "—"}</span>
 
               <span className="pr-2 text-sm text-gray-500">Address:</span>
-              <span className="text-lg font-semibold">
-                {task.address || "—"}
-              </span>
+              <span className="text-lg">{task.address || "—"}</span>
 
               <span className="pr-2 text-sm text-gray-500">URL:</span>
-              <span className="text-lg font-semibold">
+              <span className="text-lg">
                 {task.urlLink ? (
                   <a
                     href={task.urlLink}
