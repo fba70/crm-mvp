@@ -1,12 +1,6 @@
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { UserAvatar } from "@/components/user-avatar"
 import { format } from "date-fns"
 import {
@@ -18,6 +12,7 @@ import {
 } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
+import BudgetCharts from "@/components/business/budget-charts"
 import { getServerSession } from "@/lib/get-session"
 import { unauthorized } from "next/navigation"
 import { User } from "@/lib/auth"
@@ -75,12 +70,9 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-4 py-6">
-      <div className="space-y-6">
+      <div className="space-y-3">
         <div className="space-y-2">
-          <h1 className="text-2xl font-semibold">Dashboard</h1>
-          <p className="text-muted-foreground">
-            Welcome back! Here&apos;s your account overview.
-          </p>
+          <h1 className="text-2xl font-semibold">User Dashboard</h1>
         </div>
 
         {user.emailVerified ? null : <EmailVerificationAlert />}
@@ -90,6 +82,7 @@ export default async function DashboardPage() {
           numberOfUrgentTasks={numberOfDueSoonTasks}
           numberOfOverdueTasks={numberOfOverdueTasks}
         />
+        <BudgetCharts />
       </div>
     </main>
   )
@@ -104,12 +97,9 @@ function ProfileInformation({ user }: ProfileInformationProps) {
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <UserIcon className="size-5" />
+          <UserIcon size={24} />
           Profile Information
         </CardTitle>
-        <CardDescription>
-          Your account details and current status
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <div className="flex flex-row gap-6 sm:flex-row sm:items-start">
@@ -117,11 +107,11 @@ function ProfileInformation({ user }: ProfileInformationProps) {
             <UserAvatar
               name={user.name}
               image={user.image}
-              className="size-18 sm:size-18"
+              className="size-16 sm:size-16"
             />
             {user.role && (
               <Badge>
-                <ShieldIcon className="size-3" />
+                <ShieldIcon size={16} />
                 {user.role}
               </Badge>
             )}
@@ -129,18 +119,23 @@ function ProfileInformation({ user }: ProfileInformationProps) {
 
           <div className="flex-1 space-y-4">
             <div>
-              <h3 className="text-2xl font-semibold">{user.name}</h3>
+              <h3 className="text-xl font-semibold capitalize">{user.name}</h3>
               <p className="text-muted-foreground">{user.email}</p>
             </div>
 
-            <div className="space-y-2">
-              <div className="text-muted-foreground flex items-center gap-2 text-sm">
-                <CalendarDaysIcon className="size-4" />
-                Member Since
+            <div className="flex flex-row items-center justify-between gap-4">
+              <div>
+                <div className="text-muted-foreground flex items-center gap-2 text-sm">
+                  <CalendarDaysIcon size={18} />
+                  User Since
+                </div>
+                <p className="font-medium">
+                  {format(user.createdAt, "MMMM d, yyyy")}
+                </p>
               </div>
-              <p className="font-medium">
-                {format(user.createdAt, "MMMM d, yyyy")}
-              </p>
+              <Button variant="default" asChild>
+                <Link href="/profile">Edit Profile</Link>
+              </Button>
             </div>
           </div>
         </div>
@@ -162,36 +157,37 @@ function TasksSummary({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ClipboardList />
+          <ClipboardList size={24} />
           Tasks Summary Information
         </CardTitle>
-        <CardDescription>Your tasks main statistics</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="flex-crow flex gap-4 sm:flex-row sm:items-start">
-          <p>
-            Total:{" "}
-            <span className="pl-2 text-2xl text-blue-600">
-              {totalNumberOfTasks}
-            </span>
-          </p>
-          <p>
-            Urgent:{" "}
-            <span className="pl-2 text-2xl text-orange-400">
-              {numberOfUrgentTasks}
-            </span>
-          </p>
-          <p>
-            Overdue:{" "}
-            <span className="pl-2 text-2xl text-red-600">
-              {numberOfOverdueTasks}
-            </span>
-          </p>
-        </div>
+      <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-row gap-2 sm:items-start">
+          <div className="flex flex-row gap-3 sm:items-start">
+            <p>
+              <span className="text-sm text-gray-400">Total:</span>
+              <span className="pl-1 text-2xl text-blue-600">
+                {totalNumberOfTasks}
+              </span>
+            </p>
+            <p>
+              <span className="text-sm text-gray-400">Urgent:</span>
+              <span className="pl-1 text-2xl text-orange-400">
+                {numberOfUrgentTasks}
+              </span>
+            </p>
+            <p>
+              <span className="text-sm text-gray-400">Overdue:</span>
+              <span className="pl-1 text-2xl text-red-600">
+                {numberOfOverdueTasks}
+              </span>
+            </p>
+          </div>
 
-        <Button className="mt-6" asChild>
-          <Link href="/tasks">View All Tasks</Link>
-        </Button>
+          <Button className="ml-auto" asChild>
+            <Link href="/tasks">View Tasks</Link>
+          </Button>
+        </div>
       </CardContent>
     </Card>
   )
