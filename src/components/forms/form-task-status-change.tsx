@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/select"
 import type { Task } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
+import { toast } from "sonner"
 
 type TaskStatusUpdateFields = {
   status: "OPEN" | "CLOSED" | "DELETED"
@@ -72,10 +73,12 @@ export default function FormTaskStatusChangeDialog({
       try {
         const res = await axiosApi.patch(`/api/task/${task.id}`, payload)
         onSuccess(res.data)
+        toast.success("Task updated successfully")
         onOpenChange(false)
       } catch (err) {
         console.log("Task update error", err)
         setError("Failed to update task")
+        toast.error("Failed to update task")
       }
     })
   }

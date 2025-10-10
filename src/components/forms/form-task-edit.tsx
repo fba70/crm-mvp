@@ -27,6 +27,7 @@ import {
 } from "@/components/ui/select"
 import type { Task, Client } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
+import { toast } from "sonner"
 
 type TaskEditFormFields = {
   theme?: string
@@ -92,10 +93,12 @@ export default function FormTaskEditDialog({
       try {
         const res = await axiosApi.patch(`/api/task/${task.id}`, payload)
         onSuccess(res.data)
+        toast.success("Task updated successfully")
         setOpen(false)
       } catch (err) {
         console.log("Task update error", err)
         setError("Failed to update task")
+        toast.error("Failed to update task")
       }
     })
   }

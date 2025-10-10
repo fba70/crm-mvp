@@ -30,6 +30,7 @@ import { Textarea } from "@/components/ui/textarea"
 import type { Client, Feed } from "@/types/task-client"
 import { FeedType, FeedStatus } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
+import { toast } from "sonner"
 
 export default function FormNewFeedDialog({
   onSuccess,
@@ -81,10 +82,12 @@ export default function FormNewFeedDialog({
       try {
         const res = await axiosApi.post(`/api/feed/`, payload)
         onSuccess(res.data)
+        toast.success("Feed created successfully")
         setOpen(false)
       } catch (err) {
         console.log("Feed create error", err)
         setError("Failed to create feed")
+        toast.error("Failed to create feed")
       }
     })
   }

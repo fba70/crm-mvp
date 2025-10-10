@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import type { Client } from "@/types/task-client"
 import axiosApi from "@/lib/axios"
+import { toast } from "sonner"
 
 type ClientEditFormFields = {
   name: string
@@ -59,10 +60,12 @@ export default function FormNewClientDialog({
       try {
         const res = await axiosApi.post(`/api/client/`, payload)
         onSuccess(res.data)
+        toast.success("Client created successfully")
         setOpen(false)
       } catch (err) {
         console.log("Client create error", err)
         setError("Failed to create client")
+        toast.error("Failed to create client")
       }
     })
   }

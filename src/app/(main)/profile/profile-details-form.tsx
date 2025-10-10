@@ -21,6 +21,7 @@ import { useForm } from "react-hook-form"
 import { z } from "zod"
 import { User } from "@/lib/auth"
 import { updateUser } from "@/lib/auth-client"
+import { toast } from "sonner"
 
 const updateProfileSchema = z.object({
   name: z.string().trim().min(1, { message: "Name is required" }),
@@ -55,8 +56,10 @@ export function ProfileDetailsForm({ user }: ProfileDetailsFormProps) {
 
     if (error) {
       setError(error.message || "Something went wrong")
+      toast.error(error.message || "Something went wrong")
     } else {
       setStatus("Profile updated successfully!")
+      toast.success("Profile updated successfully!")
       router.refresh()
     }
   }

@@ -2,6 +2,7 @@ import { useState, useEffect } from "react"
 import axiosApi from "@/lib/axios"
 import { ThumbsUp } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { toast } from "sonner"
 
 export function LikeButton({ feedId }: { feedId: string }) {
   const [likeCount, setLikeCount] = useState<number | null>(null)
@@ -27,8 +28,10 @@ export function LikeButton({ feedId }: { feedId: string }) {
       await axiosApi.post(`/api/feed/${feedId}/like`)
       const response = await axiosApi.get(`/api/feed/${feedId}/like`)
       setLikeCount(response.data.likeCount)
+      toast.success("Thanks for you like!")
     } catch (error) {
       console.error("Error liking the feed item:", error)
+      toast.error("Failed to like the feed item ...")
     } finally {
       setIsLiking(false)
     }

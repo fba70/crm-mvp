@@ -16,6 +16,7 @@ import { useState } from "react"
 import { useForm } from "react-hook-form"
 import z from "zod"
 import { changeEmail } from "@/lib/auth-client"
+import { toast } from "sonner"
 
 export const updateEmailSchema = z.object({
   newEmail: z.email({ message: "Enter a valid email" }),
@@ -49,8 +50,10 @@ export function EmailForm({ currentEmail }: EmailFormProps) {
 
     if (error) {
       setError(error.message || "Failed to initiate email change")
+      toast.error(error.message || "Failed to initiate email change")
     } else {
       setStatus("Verification email is sent to your current email address!")
+      toast.success("Verification email is sent to your current email address!")
     }
   }
 

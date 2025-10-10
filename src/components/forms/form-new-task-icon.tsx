@@ -29,6 +29,7 @@ import {
 import type { Task, Client } from "@/types/task-client"
 import { CalendarCheck } from "lucide-react"
 import axiosApi from "@/lib/axios"
+import { toast } from "sonner"
 
 type TaskEditFormFields = {
   theme?: string
@@ -89,10 +90,12 @@ export default function FormNewTaskIconDialog({
       try {
         const res = await axiosApi.post(`/api/task/`, payload)
         onSuccess(res.data)
+        toast.success("Task created successfully")
         setOpen(false)
       } catch (err) {
         console.log("Task create error", err)
         setError("Failed to create task")
+        toast.error("Failed to create task")
       }
     })
   }

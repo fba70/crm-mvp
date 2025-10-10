@@ -17,6 +17,7 @@ import { zodResolver } from "@hookform/resolvers/zod"
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { z } from "zod"
+import { toast } from "sonner"
 
 const updatePasswordSchema = z.object({
   currentPassword: z
@@ -54,8 +55,10 @@ export function PasswordForm() {
 
     if (error) {
       setError(error.message || "Failed to initiate password change")
+      toast.error(error.message || "Failed to initiate password change")
     } else {
       setStatus("Password changed successfully!")
+      toast.success("Password changed successfully!")
     }
   }
 
