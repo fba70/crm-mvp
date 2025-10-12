@@ -27,8 +27,8 @@ import {
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
-import type { Client, Feed } from "@/types/task-client"
-import { FeedType, FeedStatus } from "@/types/task-client"
+import type { Client, Feed } from "@/types/entities"
+import { FeedType, FeedStatus } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 

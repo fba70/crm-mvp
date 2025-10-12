@@ -67,7 +67,7 @@ export default function BudgetCharts() {
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ChartNoAxesCombined size={24} />
-          Budget Charts
+          Budget and Statistics Charts
         </CardTitle>
       </CardHeader>
       <CardContent>

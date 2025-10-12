@@ -12,7 +12,7 @@ import {
   Eye,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
-import type { Task } from "@/types/task-client"
+import type { Task } from "@/types/entities"
 import { format } from "date-fns"
 import FormTaskStatusChangeDialog from "@/components/forms/form-task-status-change"
 
@@ -23,6 +23,8 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   const [isScrolling, setIsScrolling] = useState(false)
   const [statusDialogOpen1, setStatusDialogOpen1] = useState(false)
   const [statusDialogOpen2, setStatusDialogOpen2] = useState(false)
+
+  console.log("Tasks in carousel:", tasks)
 
   const handleScroll = (direction: "up" | "down") => {
     if (isScrolling) return
@@ -124,7 +126,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   // Gradient: bg-gradient-to-t from-white to-gray-200
 
   return (
-    <div className="relative h-[68vh] w-full overflow-hidden">
+    <div className="relative h-[67vh] w-full overflow-hidden">
       {/* Carousel Container */}
       <div className="relative flex h-full w-full items-center justify-center">
         {/* Progress Ring for Center Card */}
@@ -180,13 +182,17 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
             }}
           >
             <Eye />
-            Task Details
+            TASK DETAILS
           </Button>
         )}
 
         {/* Action Buttons for Center Card */}
         {currentIndex >= 0 && currentIndex < tasks.length && (
           <>
+            <div className="absolute top-3/4 left-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-300 text-xl text-white shadow-lg">
+              {tasks[currentIndex].linkedTasks?.length || 0}
+            </div>
+
             <a
               href={`mailto:${tasks[currentIndex]?.client?.email ?? ""}`}
               onClick={(e) => {

@@ -25,7 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Task, Client } from "@/types/task-client"
+import type { Task, Client } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 
@@ -106,7 +106,7 @@ export default function FormTaskEditDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="default" className="mx-auto w-[80%]">
+        <Button variant="default" className="mx-auto">
           {triggerLabel}
         </Button>
       </DialogTrigger>

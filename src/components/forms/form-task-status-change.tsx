@@ -24,7 +24,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Task } from "@/types/task-client"
+import type { Task } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 

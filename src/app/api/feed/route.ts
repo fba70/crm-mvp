@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import { getServerSession } from "@/lib/get-session"
-import { FeedType, FeedStatus } from "@/types/task-client"
+import { FeedType, FeedStatus } from "@/types/entities"
 
 export async function GET() {
   const session = await getServerSession()

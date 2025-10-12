@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Task, Client } from "@/types/task-client"
+import type { Task, Client } from "@/types/entities"
 import { CalendarCheck } from "lucide-react"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
@@ -43,16 +43,21 @@ type TaskEditFormFields = {
   address?: string
   urlLink?: string
   clientId?: string
+  parentTaskId?: string
 }
 
 export default function FormNewTaskIconDialog({
   clients,
   userId,
   onSuccess,
+  triggerLabel,
+  parentTaskId,
 }: {
   clients: Client[]
   userId: string
   onSuccess: (t: Task) => void
+  triggerLabel?: string
+  parentTaskId?: string
 }) {
   const form = useForm<TaskEditFormFields>({
     defaultValues: {
@@ -67,6 +72,7 @@ export default function FormNewTaskIconDialog({
       address: "",
       urlLink: "",
       clientId: "",
+      parentTaskId: parentTaskId || undefined,
     },
   })
 
@@ -81,6 +87,7 @@ export default function FormNewTaskIconDialog({
         ...data,
         createdById: userId,
         assignedToId: userId,
+        parentTaskId: parentTaskId || undefined,
       }
 
       if (payload.date) {
@@ -103,8 +110,12 @@ export default function FormNewTaskIconDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="">
+        <Button
+          variant="outline"
+          className="flex flex-row items-center justify-center gap-1"
+        >
           <CalendarCheck size={24} />
+          {triggerLabel}
         </Button>
       </DialogTrigger>
       <DialogContent>

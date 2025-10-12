@@ -17,7 +17,7 @@ import {
   SelectItem,
 } from "@/components/ui/select"
 import axios from "axios"
-import { FeedStatus } from "@/types/task-client"
+import { FeedStatus } from "@/types/entities"
 import { toast } from "sonner"
 
 export function StatusChangeDialog({

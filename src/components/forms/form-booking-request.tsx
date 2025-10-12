@@ -28,7 +28,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import { TicketsPlane } from "lucide-react"
-import type { Feed } from "@/types/task-client"
+import type { Feed } from "@/types/entities"
 import axios from "axios"
 import { toast } from "sonner"
 
@@ -96,7 +96,7 @@ export default function BookingRequestDialog({
     const bookingPrompt =
       "You are a travel agent. Please assist with the following booking requirements:\n\n" +
       transformBookingData(data) +
-      "\n\nPlease provide suitable travel options including transportation and accommodation details if required. Do not search for real data, just emulate the response providing 3 options in a structured format."
+      "\n\nProvide suitable travel options including transportation and accommodation details if required. Do not search for real data, just emulate the response providing 3 options in a structured format such as: Option_1_:, Option_2_: and Option_3_:. Keep the response short and concise with most important booking information only."
 
     startTransition(async () => {
       try {

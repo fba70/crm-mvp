@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import { unauthorized } from "next/navigation"
 import { TasksCarousel } from "@/components/business/carousel"
-import type { Task, Client } from "@/types/task-client"
+import type { Task, Client } from "@/types/entities"
 import FormNewTaskDialog from "@/components/forms/form-new-task"
 import axiosApi from "@/lib/axios"
 import TasksLoading from "./loading"
@@ -91,6 +91,7 @@ export default function TasksPage() {
               clients={clients}
               userId={user?.user.id}
               onSuccess={() => fetchTasks()}
+              triggerLabel="Add New Task"
             />
           )}
         </div>

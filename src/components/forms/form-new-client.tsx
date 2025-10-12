@@ -18,7 +18,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { Client } from "@/types/task-client"
+import type { Client } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 

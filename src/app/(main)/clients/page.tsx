@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import { unauthorized } from "next/navigation"
-import type { Client } from "@/types/task-client"
+import type { Client } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import ClientsLoading from "./loading"
 import FormNewClientDialog from "@/components/forms/form-new-client"

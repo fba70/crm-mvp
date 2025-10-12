@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { JSX, useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
@@ -8,13 +8,20 @@ import axios from "axios"
 import RouteButton from "@/components/business/route-button"
 import FeedItemLoading from "./loading"
 import { unauthorized, notFound } from "next/navigation"
-import type { Feed, Client } from "@/types/task-client"
+import type { Feed, Client } from "@/types/entities"
 import { Card, CardContent } from "@/components/ui/card"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { LikeButton } from "@/components/business/like-button"
 import { StatusChangeDialog } from "@/components/business/feed-status-change"
-import { AtSign, Phone } from "lucide-react"
+import { AtSign, Phone, Eye } from "lucide-react"
 import FormNewTaskIconDialog from "@/components/forms/form-new-task-icon"
 import BookingRequestDialog from "@/components/forms/form-booking-request"
 import { format } from "date-fns"
@@ -71,23 +78,21 @@ export default function FeedItemPage() {
         (feedItem?.client?.name ?? "No client provided.") +
         ".Client activity message is: " +
         (feedItem?.metadata ?? "No message provided.") +
-        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Keep the response under 100 words."
+        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Structure is into 3 recommended activity bullets like Action_1_:, Action_2_: and Action_3_: . Keep the response under 150 words."
 
       const systemPromptIndustryInfo =
-        "You are a helpful assistant providing insights for sales team members based on input from client activity feed." +
-        "Client is:" +
-        (feedItem?.client?.name ?? "No client provided.") +
-        ".Client activity message is: " +
+        "You are a helpful assistant providing insights for sales team members based on input from industry information feed." +
+        "Industry information message is: " +
         (feedItem?.metadata ?? "No message provided.") +
-        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Keep the response under 100 words."
+        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Structure is into 3 recommended activity bullets like Action_1_:, Action_2_: and Action_3_: . Keep the response under 150 words."
 
       const systemPromptRecommendations =
-        "You are a helpful assistant providing insights for sales team members based on input from client activity feed." +
+        "You are a helpful assistant providing insights for sales team members based on input about client plans and recommendations." +
         "Client is:" +
         (feedItem?.client?.name ?? "No client provided.") +
-        ".Client activity message is: " +
+        ".Client plans and recommendations message is: " +
         (feedItem?.metadata ?? "No message provided.") +
-        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Keep the response under 100 words."
+        ". Provide concise and relevant suggestions or actions that a sales team member could take based on this activity. Structure is into 3 recommended activity bullets like Action_1_:, Action_2_: and Action_3_: . Keep the response under 150 words."
 
       let systemPrompt = ""
 
@@ -122,6 +127,70 @@ export default function FeedItemPage() {
     } finally {
       setIsLoading(false)
     }
+  }
+
+  function parseFeedback(feedback: string): JSX.Element {
+    // Match each action block using regex
+    const actions =
+      feedback.match(/Action_\d+_:\s*([\s\S]*?)(?=Action_\d+_:|$)/g) || []
+
+    if (actions.length === 0) {
+      return <p>No structured actions found in the feedback.</p>
+    }
+
+    return (
+      <div className="space-y-4">
+        {actions.map((action, index) => {
+          // Extract the title and text using regex
+          const titleMatch = action.match(/Action_\d+/)
+          const textMatch = action.match(/_:\s*([\s\S]*)/)
+
+          const title = titleMatch
+            ? titleMatch[0].replace("_", " ") + ":"
+            : "Action:"
+          const text = textMatch ? textMatch[1].trim() : "No details provided."
+
+          return (
+            <div key={index}>
+              <p className="font-semibold">{title}</p>
+              <p className="text-gray-700">{text}</p>
+            </div>
+          )
+        })}
+      </div>
+    )
+  }
+
+  function parseFeedbackBooking(feedback: string): JSX.Element {
+    // Match each action block using regex
+    const actions =
+      feedback.match(/Option_\d+_:\s*([\s\S]*?)(?=Option_\d+_:|$)/g) || []
+
+    if (actions.length === 0) {
+      return <p>No structured actions found in the feedback.</p>
+    }
+
+    return (
+      <div className="space-y-4">
+        {actions.map((action, index) => {
+          // Extract the title and text using regex
+          const titleMatch = action.match(/Option_\d+/)
+          const textMatch = action.match(/_:\s*([\s\S]*)/)
+
+          const title = titleMatch
+            ? titleMatch[0].replace("_", " ") + ":"
+            : "Option:"
+          const text = textMatch ? textMatch[1].trim() : "No details provided."
+
+          return (
+            <div key={index}>
+              <p className="font-semibold">{title}</p>
+              <p className="text-gray-700">{text}</p>
+            </div>
+          )
+        })}
+      </div>
+    )
   }
 
   if (loading) return <FeedItemLoading />
@@ -211,18 +280,56 @@ export default function FeedItemPage() {
                 <span className="w-[60px] text-sm text-gray-400">
                   Assistant:
                 </span>
-                <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
-                  {feedItem.feedback || "No message"}
-                </span>
+                <div className="relative">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="absolute top-1 right-2 rounded-full bg-gray-200 p-1 hover:bg-gray-400">
+                        <Eye size={16} />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Assistant Details</DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-2 max-h-180 overflow-y-auto text-sm text-gray-700">
+                        {parseFeedback(
+                          feedItem.feedback || "No feedback available",
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <span className="block max-h-20 w-[290px] overflow-y-auto text-sm">
+                    {feedItem.feedback || "No message"}
+                  </span>
+                </div>
               </div>
             )}
 
             {feedItem.feedbackBooking && (
               <div className="flex flex-row items-center justify-start gap-4">
                 <span className="w-[60px] text-sm text-gray-400">Booking:</span>
-                <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
-                  {feedItem.feedbackBooking || "No message"}
-                </span>
+                <div className="relative">
+                  <Dialog>
+                    <DialogTrigger asChild>
+                      <button className="absolute top-1 right-2 rounded-full bg-gray-200 p-1 hover:bg-gray-400">
+                        <Eye size={16} />
+                      </button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Booking Assistant Details</DialogTitle>
+                      </DialogHeader>
+                      <div className="mt-2 max-h-180 overflow-y-auto text-sm text-gray-700">
+                        {parseFeedbackBooking(
+                          feedItem.feedbackBooking || "No feedback available",
+                        )}
+                      </div>
+                    </DialogContent>
+                  </Dialog>
+                  <span className="block max-h-20 w-[290px] overflow-y-auto text-sm">
+                    {feedItem.feedbackBooking || "No message"}
+                  </span>
+                </div>
               </div>
             )}
 
@@ -370,3 +477,9 @@ export default function FeedItemPage() {
     </main>
   )
 }
+
+/*
+<span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
+                  {feedItem.feedback || "No message"}
+                </span>
+*/

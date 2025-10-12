@@ -1,4 +1,5 @@
 "use client"
+
 import { useForm } from "react-hook-form"
 import { useTransition, useState } from "react"
 import { Button } from "@/components/ui/button"
@@ -25,9 +26,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Task, Client } from "@/types/task-client"
+import type { Task, Client } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
+import { DialogDescription } from "@radix-ui/react-dialog"
 
 type TaskEditFormFields = {
   theme?: string
@@ -41,18 +43,21 @@ type TaskEditFormFields = {
   address?: string
   urlLink?: string
   clientId?: string
+  parentTaskId?: string
 }
 
 export default function FormNewTaskDialog({
   clients,
   userId,
   onSuccess,
-  triggerLabel = "Add New Task",
+  triggerLabel,
+  parentTaskId,
 }: {
   clients: Client[]
   userId: string
   onSuccess: (t: Task) => void
   triggerLabel?: string
+  parentTaskId?: string
 }) {
   const form = useForm<TaskEditFormFields>({
     defaultValues: {
@@ -67,6 +72,7 @@ export default function FormNewTaskDialog({
       address: "",
       urlLink: "",
       clientId: "",
+      parentTaskId: parentTaskId || undefined,
     },
   })
 
@@ -81,6 +87,7 @@ export default function FormNewTaskDialog({
         ...data,
         createdById: userId,
         assignedToId: userId,
+        parentTaskId: parentTaskId || undefined,
       }
 
       if (payload.date) {
@@ -104,12 +111,17 @@ export default function FormNewTaskDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="default" className="">
-          {triggerLabel}
+          {triggerLabel ?? "Add New Task"}
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Create Task</DialogTitle>
+          {parentTaskId && (
+            <DialogDescription className="mt-1 text-xs text-gray-500">
+              Parent task ID: {parentTaskId}
+            </DialogDescription>
+          )}
         </DialogHeader>
         <Form {...form}>
           <form
@@ -117,28 +129,31 @@ export default function FormNewTaskDialog({
             className="space-y-4"
             autoComplete="off"
           >
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">Status</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Task status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="OPEN">OPEN</SelectItem>
-                        <SelectItem value="CLOSED">CLOSED</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex flex-row gap-8">
+            <div className="flex flex-row items-center justify-between">
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Status</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Task status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="OPEN">OPEN</SelectItem>
+                          <SelectItem value="CLOSED">CLOSED</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="type"

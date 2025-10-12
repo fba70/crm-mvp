@@ -16,7 +16,7 @@ import BudgetCharts from "@/components/business/budget-charts"
 import { getServerSession } from "@/lib/get-session"
 import { unauthorized } from "next/navigation"
 import { User } from "@/lib/auth"
-import type { Task } from "@/types/task-client"
+import type { Task } from "@/types/entities"
 import prisma from "@/lib/prisma"
 
 export const metadata: Metadata = {

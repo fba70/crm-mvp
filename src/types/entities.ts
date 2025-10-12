@@ -21,6 +21,9 @@ export type Task = {
     createdAt: string | Date
     updatedAt: string | Date
   } | null
+  parentTaskId?: string | null
+  parentTask?: Task | null
+  linkedTasks?: Task[]
   createdById: string
   assignedToId?: string | null
   createdAt: string | Date

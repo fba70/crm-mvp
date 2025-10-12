@@ -26,6 +26,7 @@ export async function GET(req: NextRequest) {
       client: true,
       createdBy: true,
       assignedTo: true,
+      linkedTasks: true,
     },
   })
 
