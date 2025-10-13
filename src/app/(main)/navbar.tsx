@@ -18,13 +18,10 @@ export async function Navbar() {
 
   return (
     <header className="bg-background border-b">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3">
-        <Link
-          href="/dashboard"
-          className="flex items-center gap-2 font-semibold"
-        >
+      <div className="mx-auto flex max-w-6xl items-center justify-between bg-gradient-to-b from-blue-500 to-cyan-500 px-4 py-3">
+        <Link href="/dashboard" className="flex items-center gap-2 text-white">
           <CalendarCheck size={32} />
-          CRM APP
+          <span className="text-xl font-semibold text-white">CRM APP</span>
         </Link>
         <div className="flex items-center gap-2">
           <NewsDrawer />

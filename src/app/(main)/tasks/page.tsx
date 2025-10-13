@@ -96,7 +96,7 @@ export default function TasksPage() {
           )}
         </div>
 
-        <div className="mb-2 flex flex-row items-center justify-between gap-4 px-6 pb-2">
+        <div className="mb-3 flex flex-row items-center justify-between gap-4 px-6">
           <Input
             type="text"
             placeholder="Filter by client name..."
@@ -117,7 +117,7 @@ export default function TasksPage() {
           </div>
         </div>
 
-        <div className="mb-2 flex flex-row items-center justify-between gap-4 px-6 pb-2">
+        <div className="mb-4 flex flex-row items-center justify-between gap-4 px-6">
           <Select
             value={sortOrder}
             onValueChange={(v) => setSortOrder(v as "asc" | "desc")}

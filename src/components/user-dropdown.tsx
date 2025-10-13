@@ -75,7 +75,7 @@ function SignOutItem() {
       toast.error("Unknown auth error")
     } else {
       toast.success("Sign-Out successfully!")
-      router.push("/sign-in")
+      router.push("/")
     }
   }
 

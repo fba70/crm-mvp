@@ -65,7 +65,7 @@ export default function TaskTransitionsPage() {
   const tasksFromMe = tasks?.filter((task) => task.transferToId) || []
   // && task.transferToId !== user?.user.id
 
-  const ITEMS_PER_PAGE = 4
+  const ITEMS_PER_PAGE = 3
   const totalPages1 = Math.ceil(tasksToMe.length / ITEMS_PER_PAGE)
   const totalPages2 = Math.ceil(tasksFromMe.length / ITEMS_PER_PAGE)
 

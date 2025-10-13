@@ -126,7 +126,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   // Gradient: bg-gradient-to-t from-white to-gray-200
 
   return (
-    <div className="relative h-[67vh] w-full overflow-hidden">
+    <div className="relative h-[68vh] w-full overflow-hidden">
       {/* Carousel Container */}
       <div className="relative flex h-full w-full items-center justify-center">
         {currentIndex >= 0 && currentIndex < tasks.length && (
@@ -181,7 +181,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
 
         {tasks[currentIndex] && (
           <Button
-            variant="outline"
+            variant="default"
             className="fixed right-35 bottom-40 z-30 rounded-lg"
             onClick={() => {
               router.push(`/tasks/${tasks[currentIndex].id}`)
@@ -195,7 +195,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         {/* Action Buttons for Center Card */}
         {currentIndex >= 0 && currentIndex < tasks.length && (
           <>
-            <div className="absolute top-3/4 left-2 flex h-16 w-16 items-center justify-center rounded-full bg-blue-300 text-xl text-white shadow-lg">
+            <div className="absolute top-3/4 left-2 flex h-16 w-16 items-center justify-center rounded-full bg-lime-600 text-xl text-white shadow-lg">
               {tasks[currentIndex].linkedTasks?.length || 0}
             </div>
 

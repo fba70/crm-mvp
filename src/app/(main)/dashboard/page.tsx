@@ -166,19 +166,19 @@ function TasksSummary({
           <div className="flex flex-row gap-3 sm:items-start">
             <p>
               <span className="text-sm text-gray-400">Total:</span>
-              <span className="pl-1 text-2xl text-blue-600">
+              <span className="pl-2 text-2xl text-blue-600">
                 {totalNumberOfTasks}
               </span>
             </p>
             <p>
               <span className="text-sm text-gray-400">Urgent:</span>
-              <span className="pl-1 text-2xl text-orange-400">
+              <span className="pl-2 text-2xl text-orange-400">
                 {numberOfUrgentTasks}
               </span>
             </p>
             <p>
               <span className="text-sm text-gray-400">Overdue:</span>
-              <span className="pl-1 text-2xl text-red-600">
+              <span className="pl-2 text-2xl text-red-600">
                 {numberOfOverdueTasks}
               </span>
             </p>
