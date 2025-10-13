@@ -20,14 +20,20 @@ export async function GET(req: NextRequest) {
 
   const tasks = await prisma.task.findMany({
     where: {
-      OR: [{ createdById: urlUserId }, { assignedToId: urlUserId }],
+      OR: [
+        { createdById: urlUserId },
+        { assignedToId: urlUserId },
+        { transferToId: urlUserId },
+      ],
     },
     include: {
       client: true,
       createdBy: true,
       assignedTo: true,
       linkedTasks: true,
+      transferTo: true,
     },
+    orderBy: { createdAt: "desc" },
   })
 
   return NextResponse.json(tasks)

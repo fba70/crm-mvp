@@ -283,8 +283,8 @@ export default function FeedItemPage() {
                 <div className="relative">
                   <Dialog>
                     <DialogTrigger asChild>
-                      <button className="absolute top-1 right-2 rounded-full bg-gray-200 p-1 hover:bg-gray-400">
-                        <Eye size={16} />
+                      <button className="absolute right-2 bottom-1 rounded-full bg-blue-500 p-1">
+                        <Eye size={16} className="text-white" />
                       </button>
                     </DialogTrigger>
                     <DialogContent>
@@ -311,8 +311,8 @@ export default function FeedItemPage() {
                 <div className="relative">
                   <Dialog>
                     <DialogTrigger asChild>
-                      <button className="absolute top-1 right-2 rounded-full bg-gray-200 p-1 hover:bg-gray-400">
-                        <Eye size={16} />
+                      <button className="absolute right-2 bottom-1 rounded-full bg-blue-500 p-1">
+                        <Eye size={16} className="text-white" />
                       </button>
                     </DialogTrigger>
                     <DialogContent>

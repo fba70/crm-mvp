@@ -24,6 +24,7 @@ model User {
   createdTasks    Task[]    @relation("CreatedTasks")
   assignedTasks   Task[]    @relation("AssignedTasks")
   createdClients  Client[]  @relation("CreatedClients")
+  transferredTasks Task[]   @relation("TransferredTasks")
 
   likes       Like[]
 
@@ -96,6 +97,12 @@ enum TaskStatus {
   DELETED
 }
 
+enum TransferStatus {
+  ACCEPTED
+  REJECTED
+  UNDEFINED
+}
+
 model Task {
   id              String   @id @default(uuid())
   type            TaskType
@@ -122,6 +129,13 @@ model Task {
   parentTaskId    String?   
   parentTask      Task?     @relation("TaskLinks", fields: [parentTaskId], references: [id])
   linkedTasks     Task[]    @relation("TaskLinks")
+
+// Task transfer fields
+  transferToId      String?   
+  transferTo        User?     @relation("TransferredTasks", fields: [transferToId], references: [id])
+  transferToReason  String?
+  transferStatus    TransferStatus @default(UNDEFINED)
+  rejectionReason   String?
 
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt

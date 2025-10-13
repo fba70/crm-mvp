@@ -10,11 +10,18 @@ import { ChevronsRight } from "lucide-react"
 import { format } from "date-fns"
 import FormTaskEditDialog from "@/components/forms/form-task-edit"
 import FormNewTaskDialog from "@/components/forms/form-new-task"
+import FormTaskTransferDialog from "@/components/forms/form-task-transfer"
 import type { Task, Client } from "@/types/entities"
 import { unauthorized, notFound } from "next/navigation"
 import TaskLoading from "./loading"
 import axiosApi from "@/lib/axios"
 import { Button } from "@/components/ui/button"
+
+type User = {
+  id: string
+  name: string
+  image: string | null
+}
 
 export default function TaskPage() {
   const router = useRouter()
@@ -27,6 +34,8 @@ export default function TaskPage() {
   const [loading, setLoading] = useState(true)
   const [clients, setClients] = useState<Client[]>([])
   const [clientsLoading, setClientsLoading] = useState(true)
+  const [users, setUsers] = useState<User[]>([])
+  const [loadingUsers, setLoadingUsers] = useState(true)
 
   const fetchTask = () => {
     setLoading(true)
@@ -44,14 +53,26 @@ export default function TaskPage() {
       .finally(() => setClientsLoading(false))
   }
 
+  const fetchUsers = async () => {
+    try {
+      const response = await axiosApi.get("/api/user")
+      setUsers(response.data)
+    } catch (error) {
+      console.error("Failed to fetch users:", error)
+    } finally {
+      setLoadingUsers(false)
+    }
+  }
+
   useEffect(() => {
     if (!id) return
 
     fetchTask()
     fetchClients()
+    fetchUsers()
   }, [id, router])
 
-  if (loading || clientsLoading) return <TaskLoading />
+  if (loading || clientsLoading || loadingUsers) return <TaskLoading />
   if (!user && !isPending) {
     unauthorized()
   }
@@ -72,65 +93,78 @@ export default function TaskPage() {
       <div className="space-y-6">
         <Card className="mx-auto mt-6 flex w-[90%] max-w-xl flex-col">
           <CardHeader>
-            <CardTitle className="flex items-center gap-4">
-              <p>
-                <span className="pr-2 text-sm text-gray-500">Task type: </span>
+            <CardTitle className="flex items-center justify-between gap-4">
+              <div className="flex flex-row items-center justify-start gap-1">
                 {task.type}
-              </p>
-              <Badge
-                variant="outline"
-                className={
-                  task.status === "OPEN"
-                    ? "border-green-600 text-green-600"
-                    : "border-gray-300 text-gray-500"
-                }
-              >
-                {task.status}
-              </Badge>
-              <Badge
-                variant="outline"
-                className={
-                  task.priority === "HIGH"
-                    ? "border-red-600 text-red-600"
-                    : task.priority === "MEDIUM"
-                      ? "border-yellow-600 text-yellow-600"
-                      : "border-gray-300 text-blue-500"
-                }
-              >
-                {task.priority}
-              </Badge>
+              </div>
+              <div className="flex items-center justify-center gap-2">
+                <Badge
+                  variant="outline"
+                  className={
+                    task.status === "OPEN"
+                      ? "border-green-600 text-green-600"
+                      : "border-gray-300 text-gray-500"
+                  }
+                >
+                  {task.status}
+                </Badge>
+                <Badge
+                  variant="outline"
+                  className={
+                    task.priority === "HIGH"
+                      ? "border-red-600 text-red-600"
+                      : task.priority === "MEDIUM"
+                        ? "border-yellow-600 text-yellow-600"
+                        : "border-gray-300 text-blue-500"
+                  }
+                >
+                  {task.priority}
+                </Badge>
+                {task.transferToId && (
+                  <Badge
+                    variant="outline"
+                    className={
+                      task.transferStatus === "REJECTED"
+                        ? "border-red-600 text-red-600"
+                        : task.transferStatus === "ACCEPTED"
+                          ? "border-green-600 text-green-600"
+                          : "border-gray-300 text-gray-500"
+                    }
+                  >
+                    {task.transferStatus}
+                  </Badge>
+                )}
+              </div>
             </CardTitle>
           </CardHeader>
 
           <CardContent>
             <div className="mb-4 grid max-h-120 grid-cols-[auto_1fr] items-center gap-x-4 gap-y-2 overflow-y-auto">
-              <span className="pr-2 text-sm text-gray-500">Task:</span>
-              <span className="text-lg">{task.theme || "—"}</span>
+              <div className="pr-2 text-sm text-gray-500">Task Name:</div>
+              <div className="text-lg">{task.theme || "—"}</div>
 
-              <span className="pr-2 text-sm text-gray-500">Client:</span>
-              <span className="text-lg">{task.client?.name || "—"}</span>
+              <div className="pr-2 text-sm text-gray-500">Client:</div>
+              <div className="text-lg">{task.client?.name || "—"}</div>
 
-              <span className="pr-2 text-sm text-gray-500">Due date:</span>
-              <span className="text-lg">
+              <div className="pr-2 text-sm text-gray-500">Due Date:</div>
+              <div className="text-lg">
                 {task.date ? format(new Date(task.date), "dd.MM.yyyy") : "—"}
-              </span>
+              </div>
 
-              <span className="pr-2 text-sm text-gray-500">
-                Contact Person:
-              </span>
-              <span className="text-lg">{task.contactPerson || "—"}</span>
+              <div className="pr-2 text-sm text-gray-500">Contact Person:</div>
+              <div className="text-lg">{task.contactPerson || "—"}</div>
 
-              <span className="pr-2 text-sm text-gray-500">Contact Email:</span>
-              <span className="text-lg">{task.contactEmail || "—"}</span>
+              <div className="pr-2 text-sm text-gray-500">Contact Email:</div>
+              <div className="text-lg">{task.contactEmail || "—"}</div>
 
-              <span className="pr-2 text-sm text-gray-500">Contact Phone:</span>
-              <span className="text-lg">{task.contactPhone || "—"}</span>
+              <div className="pr-2 text-sm text-gray-500">Contact Phone:</div>
+              <div className="text-lg">{task.contactPhone || "—"}</div>
 
-              <span className="pr-2 text-sm text-gray-500">Address:</span>
-              <span className="text-lg">{task.address || "—"}</span>
+              <div className="pr-2 text-sm text-gray-500">Address:</div>
+              <div className="text-lg">{task.address || "—"}</div>
 
-              <span className="pr-2 text-sm text-gray-500">URL:</span>
-              <span className="text-lg">
+              <div className="pr-2 text-sm text-gray-500">Meeting URL:</div>
+              <div className="text-lg">
                 {task.urlLink ? (
                   <a
                     href={task.urlLink}
@@ -143,14 +177,12 @@ export default function TaskPage() {
                 ) : (
                   "—"
                 )}
-              </span>
+              </div>
 
               {task.parentTaskId && (
                 <>
-                  <span className="pr-2 text-sm text-gray-500">
-                    Parent task:
-                  </span>
-                  <span className="flex items-center justify-center gap-2 text-lg">
+                  <div className="pr-2 text-sm text-gray-500">Parent task:</div>
+                  <div className="flex items-center justify-center gap-2 text-lg">
                     {task.parentTask?.theme}{" "}
                     <Button
                       variant="outline"
@@ -162,24 +194,22 @@ export default function TaskPage() {
                     >
                       <ChevronsRight />
                     </Button>
-                  </span>
+                  </div>
                 </>
               )}
 
               {task.linkedTasks && task.linkedTasks.length > 0 && (
                 <>
-                  <span className="pr-2 text-sm text-gray-500">
-                    Linked task(s):
-                  </span>
+                  <div className="pr-2 text-sm text-gray-500">
+                    Linked Task(s):
+                  </div>
                   <div className="flex flex-col gap-2">
                     {task.linkedTasks.map((linkedTask) => (
-                      <span
+                      <div
                         key={linkedTask.id}
                         className="flex items-center justify-between gap-2"
                       >
-                        <span className="text-lg">
-                          {linkedTask.theme || "—"}
-                        </span>
+                        <div className="text-lg">{linkedTask.theme || "—"}</div>
                         <Button
                           variant="outline"
                           onClick={() => {
@@ -188,8 +218,20 @@ export default function TaskPage() {
                         >
                           <ChevronsRight />
                         </Button>
-                      </span>
+                      </div>
                     ))}
+                  </div>
+                </>
+              )}
+
+              {task.transferToId && (
+                <>
+                  <div className="pr-2 text-sm text-gray-500">
+                    Transfered to:
+                  </div>
+                  <div className="text-lg">
+                    {users.find((u) => u.id === task.transferToId)?.name ||
+                      "Unknown"}
                   </div>
                 </>
               )}
@@ -208,10 +250,16 @@ export default function TaskPage() {
                 clients={clients}
                 userId={user?.user.id}
                 onSuccess={fetchTask}
-                triggerLabel="Add New Linked Task"
+                triggerLabel="Add Linked Task"
                 parentTaskId={task.id}
               />
             )}
+
+            <FormTaskTransferDialog
+              taskId={task.id}
+              onSuccess={fetchTask}
+              triggerLabel="Transfer Task"
+            />
           </div>
         </Card>
       </div>

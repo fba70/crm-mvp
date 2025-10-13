@@ -1,3 +1,5 @@
+import { User } from "@/generated/prisma/wasm"
+
 export type Task = {
   id: string
   type: "CALL" | "MEET" | "EMAIL" | "OFFER" | "PRESENTATION"
@@ -24,6 +26,11 @@ export type Task = {
   parentTaskId?: string | null
   parentTask?: Task | null
   linkedTasks?: Task[]
+  transferToId: string | null
+  transferTo?: User | null
+  transferToReason?: string | null
+  transferStatus?: "UNDEFINED" | "ACCEPTED" | "REJECTED"
+  rejectionReason?: string | null
   createdById: string
   assignedToId?: string | null
   createdAt: string | Date

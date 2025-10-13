@@ -1,8 +1,8 @@
 "use client"
+
 import { useForm } from "react-hook-form"
-import { useTransition, useState, useEffect } from "react"
+import { useTransition, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
 import {
   Form,
   FormField,
@@ -16,51 +16,34 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
+import { Label } from "@/components/ui/label"
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import type { Task } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
+import { Textarea } from "@/components/ui/textarea"
 
 type TaskStatusUpdateFields = {
-  status: "OPEN" | "CLOSED" | "DELETED"
-  statusChangeReason?: string
+  transferStatus?: "UNDEFINED" | "ACCEPTED" | "REJECTED"
+  rejectionReason?: string
 }
 
-export default function FormTaskStatusChangeDialog({
+export default function FormTaskTransferManageDialog({
   task,
-  status,
   onSuccess,
-  open,
-  onOpenChange,
 }: {
   task: Task
-  status: "OPEN" | "CLOSED" | "DELETED"
   onSuccess: (t: Task) => void
-  open: boolean
-  onOpenChange: (open: boolean) => void
 }) {
   const form = useForm<TaskStatusUpdateFields>({
     defaultValues: {
-      status: status,
-      statusChangeReason: task.statusChangeReason || "",
+      transferStatus: "ACCEPTED",
     },
   })
 
-  useEffect(() => {
-    form.reset({
-      status: status,
-      statusChangeReason: task.statusChangeReason || "",
-    })
-  }, [status, task, form])
-
-  // console.log("TASK data", task)
+  const [isOpen, setIsOpen] = useState(false) // State to control dialog visibility
 
   const [isPending, startTransition] = useTransition()
   const [error, setError] = useState<string | null>(null)
@@ -73,21 +56,26 @@ export default function FormTaskStatusChangeDialog({
       try {
         const res = await axiosApi.patch(`/api/task/${task.id}`, payload)
         onSuccess(res.data)
-        toast.success("Task updated successfully")
-        onOpenChange(false)
+        toast.success("Task transfer status updated successfully")
+        setIsOpen(false) // Close the dialog on success
       } catch (err) {
-        console.log("Task update error", err)
-        setError("Failed to update task")
-        toast.error("Failed to update task")
+        console.log("Task transfer status update error", err)
+        setError("Failed to update task transfer status")
+        toast.error("Failed to update task transfer status")
       }
     })
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogTrigger asChild>
+        <Button variant="default" onClick={() => setIsOpen(true)}>
+          Task Transfer
+        </Button>
+      </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Task Status Update</DialogTitle>
+          <DialogTitle>Manage Task Transfer</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -97,21 +85,27 @@ export default function FormTaskStatusChangeDialog({
           >
             <FormField
               control={form.control}
-              name="status"
+              name="transferStatus"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Status</FormLabel>
+                  <FormLabel className="text-gray-500">
+                    Accept or reject the Task:
+                  </FormLabel>
                   <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Task status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="OPEN">OPEN</SelectItem>
-                        <SelectItem value="CLOSED">CLOSED</SelectItem>
-                        <SelectItem value="DELETED">DELETED</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <RadioGroup
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      className="flex flex-row items-center justify-start gap-4 py-3"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="ACCEPTED" id="accept" />
+                        <Label htmlFor="accept">Accept</Label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="REJECTED" id="reject" />
+                        <Label htmlFor="reject">Reject</Label>
+                      </div>
+                    </RadioGroup>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -119,14 +113,14 @@ export default function FormTaskStatusChangeDialog({
             />
             <FormField
               control={form.control}
-              name="statusChangeReason"
+              name="rejectionReason"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-gray-500">
-                    Status Change Reason
+                    If you reject the Task, please provide the reason:
                   </FormLabel>
                   <FormControl>
-                    <Input type="text" {...field} />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -139,7 +133,7 @@ export default function FormTaskStatusChangeDialog({
               <Button
                 type="button"
                 variant="outline"
-                onClick={() => onOpenChange(false)}
+                onClick={() => setIsOpen(false)} // Close the dialog on cancel
                 disabled={isPending}
               >
                 Cancel

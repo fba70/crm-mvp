@@ -24,7 +24,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   const [statusDialogOpen1, setStatusDialogOpen1] = useState(false)
   const [statusDialogOpen2, setStatusDialogOpen2] = useState(false)
 
-  console.log("Tasks in carousel:", tasks)
+  // console.log("Tasks in carousel:", tasks)
 
   const handleScroll = (direction: "up" | "down") => {
     if (isScrolling) return
@@ -129,7 +129,6 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
     <div className="relative h-[67vh] w-full overflow-hidden">
       {/* Carousel Container */}
       <div className="relative flex h-full w-full items-center justify-center">
-        {/* Progress Ring for Center Card */}
         {currentIndex >= 0 && currentIndex < tasks.length && (
           <div className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center">
             <div className="relative h-80 w-80 rounded-full border-4 border-gray-300">
@@ -144,7 +143,6 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
           </div>
         )}
 
-        {/* Task Cards */}
         {tasks.map((card, index) => (
           <div
             key={card.id}
@@ -153,7 +151,15 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
             onClick={() => !isScrolling && setCurrentIndex(index)}
           >
             <div
-              className={`flex h-full w-full flex-col items-center justify-center rounded-full p-6 shadow-lg ${getTaskBgColor(card.date)}`}
+              className={`flex h-full w-full flex-col items-center justify-center rounded-full p-6 shadow-lg ${getTaskBgColor(card.date)} border-3 ${
+                card.transferToId
+                  ? card.transferStatus === "ACCEPTED"
+                    ? "border-dashed border-green-600"
+                    : card.transferStatus === "REJECTED"
+                      ? "border-dashed border-orange-600"
+                      : "border-dashed border-white"
+                  : "border-white"
+              }`}
             >
               <div className="mb-4">{renderStars(card.priority)}</div>
               <h3 className="mb-1 text-2xl font-bold text-gray-700">
