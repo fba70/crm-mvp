@@ -365,7 +365,7 @@ export default function FeedItemPage() {
                 {feedItem.actionBooking && (
                   <BookingRequestDialog
                     feedId={feedItem.id}
-                    onSuccess={() => setFeedItemRefresh(true)}
+                    onSuccess={() => setFeedItemRefresh((prev) => !prev)}
                   />
                 )}
 
@@ -447,27 +447,40 @@ export default function FeedItemPage() {
                     AI-assistant response:
                   </p>
                   <p className="text-sm text-gray-900">{response}</p>
-                  <Button
-                    variant="default"
-                    className="mt-3 w-full"
-                    onClick={async () => {
-                      try {
-                        await axios.patch(`/api/feed/${feedItem.id}`, {
-                          feedback: response,
-                        })
-                        toast.success(
-                          "Recommendation saved successfully to the feed item!",
-                        )
-                      } catch (error) {
-                        console.error("Failed to save recommendation", error)
-                        toast.error(
-                          "Failed to save recommendation. Please try again.",
-                        )
-                      }
-                    }}
-                  >
-                    Save Recommendation
-                  </Button>
+                  <div className="flex flex-col gap-3">
+                    <Button
+                      variant="default"
+                      className="w-full"
+                      onClick={async () => {
+                        try {
+                          await axios.patch(`/api/feed/${feedItem.id}`, {
+                            feedback: response,
+                          })
+                          toast.success(
+                            "Recommendation saved successfully to the feed item!",
+                          )
+                          setFeed((prevFeedItem) => {
+                            if (!prevFeedItem) return null
+                            return { ...prevFeedItem, feedback: response }
+                          })
+                        } catch (error) {
+                          console.error("Failed to save recommendation", error)
+                          toast.error(
+                            "Failed to save recommendation. Please try again.",
+                          )
+                        }
+                      }}
+                    >
+                      Save Recommendation
+                    </Button>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => setResponse("")}
+                    >
+                      Close
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
@@ -477,9 +490,3 @@ export default function FeedItemPage() {
     </main>
   )
 }
-
-/*
-<span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
-                  {feedItem.feedback || "No message"}
-                </span>
-*/

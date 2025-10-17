@@ -127,7 +127,7 @@ export default function BookingRequestDialog({
 
         const res = await axios.patch(`/api/feed/${feedId}`, payload)
         onSuccess(res.data)
-        toast.success("Booking options are saved!")
+        toast.success("Booking options are prepared!")
       } catch (err) {
         console.log("Error during booking request processing", err)
         setError("Failed to process booking request")
@@ -383,13 +383,26 @@ export default function BookingRequestDialog({
                   </Button>
                 </>
               ) : (
-                <Button
-                  type="button"
-                  variant="default"
-                  onClick={() => setOpen(false)}
-                >
-                  OK
-                </Button>
+                <>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setOpen(false)}
+                    disabled={isSubmitting}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="default"
+                    onClick={() => {
+                      toast.success("Booking feedback saved successfully!")
+                      setOpen(false)
+                    }}
+                  >
+                    Save
+                  </Button>
+                </>
               )}
             </div>
           </form>
