@@ -23,6 +23,19 @@ export function Footer() {
 
       <div className="flex max-w-6xl items-center justify-between py-3">
         <Link
+          href="/feed"
+          className={
+            pathname.startsWith("/feed")
+              ? "font-bold text-blue-400"
+              : "font-normal"
+          }
+        >
+          FEED
+        </Link>
+      </div>
+
+      <div className="flex max-w-6xl items-center justify-between py-3">
+        <Link
           href="/tasks"
           className={
             pathname.startsWith("/tasks")
@@ -31,19 +44,6 @@ export function Footer() {
           }
         >
           AUFGABEN
-        </Link>
-      </div>
-
-      <div className="flex max-w-6xl items-center justify-between py-3">
-        <Link
-          href="/transitions"
-          className={
-            pathname === "/transitions"
-              ? "font-bold text-blue-400"
-              : "font-normal"
-          }
-        >
-          ÜBERGABE
         </Link>
       </div>
 
@@ -62,14 +62,14 @@ export function Footer() {
 
       <div className="flex max-w-6xl items-center justify-between py-3">
         <Link
-          href="/feed"
+          href="/transitions"
           className={
-            pathname.startsWith("/feed")
+            pathname === "/transitions"
               ? "font-bold text-blue-400"
               : "font-normal"
           }
         >
-          FEED
+          ÜBERGABE
         </Link>
       </div>
     </footer>

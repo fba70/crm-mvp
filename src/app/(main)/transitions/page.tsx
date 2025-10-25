@@ -51,7 +51,13 @@ export default function TaskTransitionsPage() {
       setLoading(true)
       axiosApi
         .get(`/api/task?userId=${user?.user.id}`)
-        .then((res) => setTasks(res.data))
+        .then((res) => {
+          const sortedTasks = (res.data as Task[]).sort(
+            (a, b) =>
+              new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+          )
+          setTasks(sortedTasks)
+        })
         .finally(() => setLoading(false))
     }
   }, [user, isPending])
@@ -62,7 +68,10 @@ export default function TaskTransitionsPage() {
 
   const tasksToMe =
     tasks?.filter((task) => task.transferToId === user?.user.id) || []
-  const tasksFromMe = tasks?.filter((task) => task.transferToId) || []
+  const tasksFromMe =
+    tasks?.filter(
+      (task) => task.assignedToId === user?.user.id && task.transferToId,
+    ) || []
   // && task.transferToId !== user?.user.id
 
   const ITEMS_PER_PAGE = 3

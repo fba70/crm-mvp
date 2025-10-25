@@ -160,11 +160,8 @@ export default function TaskPage() {
               <div className="pr-2 text-sm text-gray-500">Contact Phone:</div>
               <div className="text-lg">{task.contactPhone || "—"}</div>
 
-              <div className="pr-2 text-sm text-gray-500">Address:</div>
-              <div className="text-lg">{task.address || "—"}</div>
-
               <div className="pr-2 text-sm text-gray-500">Meeting URL:</div>
-              <div className="text-lg">
+              <div className="text-base">
                 {task.urlLink ? (
                   <a
                     href={task.urlLink}
@@ -178,6 +175,13 @@ export default function TaskPage() {
                   "—"
                 )}
               </div>
+
+              {task.type === "MEET" && (
+                <>
+                  <div className="pr-2 text-sm text-gray-500">Address:</div>
+                  <div className="text-lg">{task.address || "—"}</div>
+                </>
+              )}
 
               {task.parentTaskId && (
                 <>

@@ -16,7 +16,14 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AtSign, Phone, ChevronsUp, ChevronsDown, Check } from "lucide-react"
+import {
+  AtSign,
+  Phone,
+  ChevronsUp,
+  ChevronsDown,
+  Check,
+  Brain,
+} from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { LikeButton } from "@/components/business/like-button"
 import FormNewTaskIconDialog from "@/components/forms/form-new-task-icon"
@@ -182,7 +189,223 @@ function FeedCards({
     )
   }
 
-  const CARDS_PER_PAGE = 4
+  return (
+    <div className="flex flex-col items-center justify-center">
+      <div className="grid h-[680px] w-[95%] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+        {feed.map((feedItem) => (
+          <Card
+            key={feedItem.id}
+            className={cn(
+              "py-4",
+              feedItem.type === "RECOMMENDATION" &&
+                "bg-gradient-to-t from-blue-100 to-transparent",
+              feedItem.type === "CLIENT_ACTIVITY" &&
+                "bg-gradient-to-t from-cyan-100 to-transparent",
+              feedItem.type === "INDUSTRY_INFO" &&
+                "bg-gradient-to-t from-pink-100 to-transparent",
+              feedItem.type === "COLLEAGUES_UPDATE" &&
+                "bg-gradient-to-t from-green-100 to-transparent",
+            )}
+          >
+            <CardContent className="flex flex-col gap-2 px-4 py-0">
+              <div className="flex flex-row items-center justify-between gap-2">
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-sm">
+                    {feedItem.type.replace(/_/g, " ")}
+                  </div>
+
+                  <div
+                    className={cn(
+                      "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm",
+                      feedItem.status === "CANCELLED" && "text-gray-500",
+                      feedItem.status === "IN_PROGRESS" && "text-blue-500",
+                      feedItem.status === "ACTION_COMPLETED" &&
+                        "text-green-400",
+                      feedItem.status === "CLOSED" && "text-green-700",
+                      feedItem.status === "NEW" && "text-orange-500",
+                    )}
+                  >
+                    {feedItem.status
+                      .replace(/_/g, " ")
+                      .replace("ACTION COMPLETED", "ACTION OK")}
+                  </div>
+                </div>
+
+                <div className="flex flex-row items-center justify-start gap-3 text-xs text-gray-500">
+                  {format(new Date(feedItem.createdAt), "yyyy-MM-dd")}
+                </div>
+
+                <Button
+                  variant="default"
+                  onClick={async () => {
+                    try {
+                      await axiosApi.patch(`/api/feed/${feedItem.id}`, {
+                        status: FeedStatus.CLOSED,
+                      })
+                      // feedItem.status = FeedStatus.CLOSED
+                      updateFeedItem(feedItem.id, {
+                        status: FeedStatus.CLOSED,
+                      })
+                    } catch (error) {
+                      console.error("Failed to close the feed item:", error)
+                    }
+                  }}
+                >
+                  <Check />
+                </Button>
+              </div>
+
+              <div className="flex flex-row items-center justify-between">
+                <div className="flex flex-row items-center justify-start gap-3 py-2">
+                  <span className="text-sm text-gray-400">Client:</span>
+                  {feedItem.client ? (
+                    <span>{feedItem.client.name || "—"}</span>
+                  ) : (
+                    <span>No client</span>
+                  )}
+                </div>
+
+                {feedItem.taskId && (
+                  <Button
+                    variant="link"
+                    onClick={() => {
+                      if (feedItem.taskId) {
+                        router.push(`/tasks/${feedItem.taskId}`)
+                      }
+                    }}
+                  >
+                    TASK
+                  </Button>
+                )}
+              </div>
+
+              <div className="pb-2">
+                <span className="pr-2 text-sm text-gray-400">Theme:</span>
+                <span className="max-w-[200px] overflow-hidden text-sm">
+                  {feedItem.metadata}
+                </span>
+              </div>
+
+              <div className="flex flex-row items-center justify-between gap-2">
+                <div className="flex flex-row items-center justify-start gap-2">
+                  {feedItem.actionCall && (
+                    <a
+                      href={`tel:${feedItem?.client?.phone ?? ""}`}
+                      onClick={(e) => {
+                        if (!feedItem?.client?.phone) e.preventDefault()
+                      }}
+                    >
+                      <Button variant="outline">
+                        <Phone size={24} />
+                      </Button>
+                    </a>
+                  )}
+
+                  {feedItem.actionEmail && (
+                    <a
+                      href={`mailto:${feedItem?.client?.email ?? ""}`}
+                      onClick={(e) => {
+                        if (!feedItem?.client?.email) e.preventDefault()
+                      }}
+                    >
+                      <Button variant="outline">
+                        <AtSign size={24} />
+                      </Button>
+                    </a>
+                  )}
+
+                  {feedItem.actionBooking && (
+                    <BookingRequestDialog
+                      feedId={feedItem.id}
+                      onSuccess={() => {}}
+                    />
+                  )}
+
+                  {user &&
+                    !feedItem.taskId &&
+                    feedItem.actionTask &&
+                    feedItem.type !== "COLLEAGUES_UPDATE" && (
+                      <FormNewTaskIconDialog
+                        clients={
+                          feedItem.clientId
+                            ? clients.filter(
+                                (client) => client.id === feedItem.clientId,
+                              )
+                            : clients
+                        }
+                        userId={user?.user.id}
+                        onSuccess={(newTask) => {
+                          updateFeedItem(feedItem.id, { taskId: newTask.id })
+                        }}
+                      />
+                    )}
+
+                  {feedItem.type === "COLLEAGUES_UPDATE" && (
+                    <LikeButton feedId={feedItem.id} />
+                  )}
+
+                  {(feedItem.feedback || feedItem.feedbackBooking) && (
+                    <Button variant="outline">
+                      <Brain
+                        size={24}
+                        className="text-blue-500"
+                        onClick={() => {
+                          router.push(`/feed/${feedItem.id}`)
+                        }}
+                      />
+                    </Button>
+                  )}
+                </div>
+
+                <div className="flex flex-row items-center justify-center gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      router.push(`/feed/${feedItem.id}`)
+                    }}
+                  >
+                    Details
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/*
+function FeedCards({
+  feed,
+  setFeed,
+}: {
+  feed: Feed[]
+  setFeed: React.Dispatch<React.SetStateAction<Feed[]>>
+}) {
+  const router = useRouter()
+  const { data: user } = useSession()
+
+  const [clients, setClients] = useState<Client[]>([])
+
+  const fetchClients = () => {
+    axiosApi.get("/api/client").then((res) => setClients(res.data))
+  }
+
+  useEffect(() => {
+    fetchClients()
+  }, [])
+
+  const updateFeedItem = (id: string, updatedFields: Partial<Feed>) => {
+    setFeed((prevFeed) =>
+      prevFeed.map((item) =>
+        item.id === id ? { ...item, ...updatedFields } : item,
+      ),
+    )
+  }
+
+  const CARDS_PER_PAGE = 3
   const [page, setPage] = useState(1)
   const totalPages = Math.ceil(feed.length / CARDS_PER_PAGE)
   const startIdx = (page - 1) * CARDS_PER_PAGE
@@ -246,6 +469,8 @@ function FeedCards({
                   </Button>
                 )}
               </div>
+
+              <div className="pb-2">{feedItem.metadata}</div>
 
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center justify-start gap-2">
@@ -366,3 +591,4 @@ function FeedCards({
     </div>
   )
 }
+*/

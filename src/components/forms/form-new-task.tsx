@@ -80,6 +80,8 @@ export default function FormNewTaskDialog({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
+  const typeMeeting = form.watch("type")
+
   const onSubmit = (data: TaskEditFormFields) => {
     setError(null)
     startTransition(async () => {
@@ -312,19 +314,6 @@ export default function FormNewTaskDialog({
 
             <FormField
               control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">Address</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
               name="urlLink"
               render={({ field }) => (
                 <FormItem>
@@ -336,6 +325,22 @@ export default function FormNewTaskDialog({
                 </FormItem>
               )}
             />
+
+            {typeMeeting === "MEET" && (
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Address</FormLabel>
+                    <FormControl>
+                      <Input {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
 
             {error && <div className="text-sm text-red-500">{error}</div>}
 

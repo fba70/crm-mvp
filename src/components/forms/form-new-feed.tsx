@@ -48,7 +48,7 @@ export default function FormNewFeedDialog({
       actionBooking: false,
       actionTask: false,
       metadata: "",
-      clientId: "",
+      clientId: undefined,
       taskId: undefined,
     },
   })

@@ -45,7 +45,7 @@ export async function POST(req: Request) {
       data: {
         type: type as FeedType,
         status: status as FeedStatus,
-        clientId: clientId,
+        clientId: clientId || null,
         metadata: metadata,
         actionCall: actionCall || false,
         actionEmail: actionEmail || false,

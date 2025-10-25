@@ -10,11 +10,19 @@ import {
   Check,
   X,
   Eye,
+  SquareArrowOutUpRight,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Task } from "@/types/entities"
 import { format } from "date-fns"
 import FormTaskStatusChangeDialog from "@/components/forms/form-task-status-change"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import Link from "next/link"
 
 export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   const router = useRouter()
@@ -23,6 +31,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   const [isScrolling, setIsScrolling] = useState(false)
   const [statusDialogOpen1, setStatusDialogOpen1] = useState(false)
   const [statusDialogOpen2, setStatusDialogOpen2] = useState(false)
+  const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // console.log("Tasks in carousel:", tasks)
 
@@ -154,10 +163,10 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
               className={`flex h-full w-full flex-col items-center justify-center rounded-full p-6 shadow-lg ${getTaskBgColor(card.date)} border-3 ${
                 card.transferToId
                   ? card.transferStatus === "ACCEPTED"
-                    ? "border-dashed border-green-600"
+                    ? "border-green-600"
                     : card.transferStatus === "REJECTED"
-                      ? "border-dashed border-orange-600"
-                      : "border-dashed border-white"
+                      ? "border-red-600"
+                      : "border-dashed border-orange-500"
                   : "border-white"
               }`}
             >
@@ -195,9 +204,15 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         {/* Action Buttons for Center Card */}
         {currentIndex >= 0 && currentIndex < tasks.length && (
           <>
-            <div className="absolute top-3/4 left-2 flex h-16 w-16 items-center justify-center rounded-full bg-lime-600 text-xl text-white shadow-lg">
+            <button
+              className="absolute top-3/4 left-2 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-lime-600 text-xl text-white shadow-lg"
+              onClick={() => {
+                setIsDialogOpen(true)
+                console.log("Linked tasks button clicked")
+              }}
+            >
               {tasks[currentIndex].linkedTasks?.length || 0}
-            </div>
+            </button>
 
             <a
               href={`mailto:${tasks[currentIndex]?.client?.email ?? ""}`}
@@ -270,6 +285,40 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
             )}
           </>
         )}
+
+        {/* Linked Tasks Dialog */}
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Linked Tasks:</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4">
+              {tasks[currentIndex].linkedTasks?.map((linkedTask) => (
+                <div
+                  key={linkedTask.id}
+                  className="flex flex-col gap-2 border-b pb-1"
+                >
+                  <p className="text-sm font-medium">
+                    Name: {linkedTask.theme}
+                  </p>
+                  <div className="flex flex-row items-center justify-between gap-4">
+                    <p className="text-sm">Type: {linkedTask.type}</p>
+                    <p className="text-sm">Priority: {linkedTask.priority}</p>
+                    <p className="text-sm">Status: {linkedTask.status}</p>
+                    <Link
+                      href={`/tasks/${linkedTask.id}`}
+                      className="flex items-center gap-1 text-blue-500 hover:underline"
+                    >
+                      <SquareArrowOutUpRight size={16} />
+                    </Link>
+                  </div>
+
+                  {/* Add more parameters as needed */}
+                </div>
+              ))}
+            </div>
+          </DialogContent>
+        </Dialog>
 
         {/* Scroll Indicator */}
         <Button

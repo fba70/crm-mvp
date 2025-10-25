@@ -11,6 +11,7 @@ import FormClientEditDialog from "@/components/forms/form-client-edit"
 import { Card, CardContent } from "@/components/ui/card"
 import { MapPinHouse, AtSign, Phone } from "lucide-react"
 import Link from "next/link"
+import { Button } from "@/components/ui/button"
 
 export default function ClientsPage() {
   const { data: user, isPending } = useSession()
@@ -105,10 +106,15 @@ function ClientCards({
             <CardContent className="flex flex-col gap-2 px-6 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="text-lg font-semibold">{client.name}</div>
-                <FormClientEditDialog
-                  client={client}
-                  onSuccess={onClientUpdated}
-                />
+                <div className="flex gap-2">
+                  <Link href={`/clients/${client.id}`}>
+                    <Button className="default">View</Button>
+                  </Link>
+                  <FormClientEditDialog
+                    client={client}
+                    onSuccess={onClientUpdated}
+                  />
+                </div>
               </div>
 
               {client.address && (
