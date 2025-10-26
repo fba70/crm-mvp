@@ -8,7 +8,7 @@ import axios from "axios"
 import RouteButton from "@/components/business/route-button"
 import FeedItemLoading from "./loading"
 import { unauthorized, notFound } from "next/navigation"
-import type { Feed, Client } from "@/types/entities"
+import type { Feed, Client, Contact } from "@/types/entities"
 import { Card, CardContent } from "@/components/ui/card"
 import {
   Dialog,
@@ -27,6 +27,7 @@ import BookingRequestDialog from "@/components/forms/form-booking-request"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import axiosApi from "@/lib/axios"
 
 export default function FeedItemPage() {
   const params = useParams()
@@ -36,7 +37,12 @@ export default function FeedItemPage() {
 
   const [feedItem, setFeed] = useState<Feed | null>(null)
   const [loading, setLoading] = useState(true)
+
   const [clients, setClients] = useState<Client[]>([])
+  const [clientsLoading, setClientsLoading] = useState(false)
+
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [contactsLoading, setContactsLoading] = useState(false)
 
   const [userPrompt, setUserPrompt] = useState("")
   const [response, setResponse] = useState("")
@@ -44,12 +50,27 @@ export default function FeedItemPage() {
   const [feedItemRefresh, setFeedItemRefresh] = useState(false)
 
   const fetchClients = () => {
-    axios.get("/api/client").then((res) => setClients(res.data))
+    setClientsLoading(true)
+    axiosApi
+      .get("/api/client")
+      .then((res) => setClients(res.data))
+      .finally(() => setClientsLoading(false))
+  }
+
+  const fetchContacts = () => {
+    setContactsLoading(true)
+    axiosApi
+      .get("/api/contact")
+      .then((res) => setContacts(res.data))
+      .finally(() => setContactsLoading(false))
   }
 
   useEffect(() => {
     fetchClients()
+    fetchContacts()
   }, [])
+
+  console.log("Contacts:", contacts)
 
   useEffect(() => {
     const fetchFeedItem = async () => {
@@ -193,7 +214,7 @@ export default function FeedItemPage() {
     )
   }
 
-  if (loading) return <FeedItemLoading />
+  if (loading || clientsLoading || contactsLoading) return <FeedItemLoading />
   if (!feedItem) {
     notFound()
   }
@@ -381,6 +402,7 @@ export default function FeedItemPage() {
                             )
                           : clients
                       }
+                      contacts={contacts}
                       userId={user?.user.id}
                       onSuccess={(newTask) => {
                         setFeed((prevFeedItem) => {

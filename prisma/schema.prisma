@@ -25,6 +25,7 @@ model User {
   assignedTasks   Task[]    @relation("AssignedTasks")
   createdClients  Client[]  @relation("CreatedClients")
   transferredTasks Task[]   @relation("TransferredTasks")
+  createdContacts Contact[] @relation("CreatedContacts")
 
   likes       Like[]
 
@@ -112,7 +113,7 @@ model Task {
   date            DateTime?
   contactPhone    String?
   contactEmail    String?
-  contactPerson   String?
+  contactPerson   String?  // obsolete, Contact model is used instead
   address         String?
   urlLink         String?
   statusChangeReason String?
@@ -120,6 +121,10 @@ model Task {
   // Relations
   clientId        String?
   client          Client?   @relation(fields: [clientId], references: [id])
+
+  contactId       String?
+  contact         Contact? @relation(fields: [contactId], references: [id])
+
   createdById     String
   createdBy       User     @relation("CreatedTasks", fields: [createdById], references: [id])
   assignedToId    String?
@@ -140,7 +145,7 @@ model Task {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
-  // Back relation
+  // Back relations
   feeds          Feed[]
 
   @@map("task")
@@ -160,9 +165,32 @@ model Client {
 
   // Back relation
   tasks           Task[]
-  feeds          Feed[]
+  feeds           Feed[]
+  contacts        Contact[]
 
   @@map("client")
+}
+
+model Contact {
+  id          String   @id @default(uuid())
+  name        String
+  phone       String?
+  email       String?
+  position    String?
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  clientId    String?  // Optional reference to Client
+  client      Client?  @relation(fields: [clientId], references: [id])
+
+// Back relations
+  tasks       Task[]
+
+  createdById     String?
+  createdBy       User?    @relation("CreatedContacts", fields: [createdById], references: [id])
+
+  @@map("contact")
 }
 
 model Feed {

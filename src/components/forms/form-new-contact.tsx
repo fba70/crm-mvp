@@ -18,30 +18,43 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { Client } from "@/types/entities"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type { Client, Contact } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 
-type ClientEditFormFields = {
+type ContactEditFormFields = {
   name: string
   email?: string
   phone?: string
-  address?: string
+  position?: string
+  clientId?: string
+  createdById: string
 }
 
-export default function FormNewClientDialog({
+export default function FormNewContactDialog({
   userId,
+  clients,
   onSuccess,
 }: {
   userId: string
-  onSuccess: (t: Client) => void
+  clients: Client[]
+  onSuccess: (t: Contact) => void
 }) {
-  const form = useForm<ClientEditFormFields>({
+  const form = useForm<ContactEditFormFields>({
     defaultValues: {
       name: "",
       email: "",
       phone: "",
-      address: "",
+      position: "",
+      clientId: "",
+      createdById: userId,
     },
   })
 
@@ -49,23 +62,24 @@ export default function FormNewClientDialog({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const onSubmit = (data: ClientEditFormFields) => {
+  const onSubmit = (data: ContactEditFormFields) => {
     setError(null)
     startTransition(async () => {
       const payload = {
         ...data,
         createdById: userId,
+        clientId: data.clientId || null,
       }
 
       try {
-        const res = await axiosApi.post(`/api/client/`, payload)
+        const res = await axiosApi.post(`/api/contact/`, payload)
         onSuccess(res.data)
-        toast.success("Client created successfully")
+        toast.success("Contact created successfully")
         setOpen(false)
       } catch (err) {
-        console.log("Client create error", err)
-        setError("Failed to create client")
-        toast.error("Failed to create client")
+        console.log("Contact create error", err)
+        setError("Failed to create contact")
+        toast.error("Failed to create contact")
       }
     })
   }
@@ -74,12 +88,12 @@ export default function FormNewClientDialog({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="outline" className="">
-          Add New Client (admin)
+          Add New Contact (admin)
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Client</DialogTitle>
+          <DialogTitle>Add New Contact</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -128,12 +142,39 @@ export default function FormNewClientDialog({
             />
             <FormField
               control={form.control}
-              name="address"
+              name="position"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Address</FormLabel>
+                  <FormLabel className="text-gray-500">Position</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="clientId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">Client</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || ""}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {clients.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

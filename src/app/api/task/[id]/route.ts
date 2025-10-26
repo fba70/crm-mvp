@@ -12,6 +12,7 @@ export async function GET(
       where: { id },
       include: {
         client: true,
+        contact: true,
         createdBy: true,
         assignedTo: true,
         linkedTasks: true,

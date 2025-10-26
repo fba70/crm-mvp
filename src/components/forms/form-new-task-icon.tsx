@@ -1,7 +1,7 @@
 "use client"
 
-import { useForm } from "react-hook-form"
-import { useTransition, useState } from "react"
+import { useEffect, useState, useTransition } from "react"
+import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -26,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Task, Client } from "@/types/entities"
+import type { Task, Client, Contact } from "@/types/entities"
 import { CalendarCheck } from "lucide-react"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
@@ -43,17 +43,20 @@ type TaskEditFormFields = {
   address?: string
   urlLink?: string
   clientId?: string
+  contactId?: string
   parentTaskId?: string
 }
 
 export default function FormNewTaskIconDialog({
   clients,
+  contacts,
   userId,
   onSuccess,
   triggerLabel,
   parentTaskId,
 }: {
   clients: Client[]
+  contacts: Contact[]
   userId: string
   onSuccess: (t: Task) => void
   triggerLabel?: string
@@ -72,9 +75,30 @@ export default function FormNewTaskIconDialog({
       address: "",
       urlLink: "",
       clientId: "",
+      contactId: "",
       parentTaskId: parentTaskId || undefined,
     },
   })
+  const { control, setValue } = form
+
+  // Watch for changes to the contactId field
+  const selectedContactId = useWatch({
+    control,
+    name: "contactId",
+  })
+
+  // Autofill clientId based on the selected contactId
+  useEffect(() => {
+    const selectedContact = contacts.find(
+      (contact) => contact.id === selectedContactId,
+    )
+
+    if (selectedContact?.clientId) {
+      setValue("clientId", selectedContact.clientId) // Autofill clientId
+    } else {
+      setValue("clientId", "") // Clear clientId if no client reference
+    }
+  }, [selectedContactId, contacts, setValue])
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -90,6 +114,8 @@ export default function FormNewTaskIconDialog({
         createdById: userId,
         assignedToId: userId,
         parentTaskId: parentTaskId || undefined,
+        clientId: data.clientId === "No client" ? null : data.clientId, // Convert empty value to null
+        contactId: data.contactId === "No contact" ? null : data.contactId, // Convert empty value to null
       }
 
       if (payload.date) {
@@ -220,33 +246,65 @@ export default function FormNewTaskIconDialog({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="clientId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">Client</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select client" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            <div className="flex items-center justify-between">
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Client</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="No client">No client</SelectItem>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="contactId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Contact</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select contact" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="No contact">No contact</SelectItem>
+                          {contacts.map((contact) => (
+                            <SelectItem key={contact.id} value={contact.id}>
+                              {contact.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="date"
@@ -260,53 +318,6 @@ export default function FormNewTaskIconDialog({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="contactPerson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">
-                    Contact Person
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex flex-row gap-8">
-              <FormField
-                control={form.control}
-                name="contactEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-500">
-                      Contact Email
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contactPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-500">
-                      Contact Phone
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="tel" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             <FormField
               control={form.control}
@@ -359,3 +370,53 @@ export default function FormNewTaskIconDialog({
     </Dialog>
   )
 }
+
+/*
+<FormField
+              control={form.control}
+              name="contactPerson"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">
+                    Contact Person
+                  </FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex flex-row gap-8">
+              <FormField
+                control={form.control}
+                name="contactEmail"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Contact Email
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="email" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="contactPhone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">
+                      Contact Phone
+                    </FormLabel>
+                    <FormControl>
+                      <Input type="tel" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+*/

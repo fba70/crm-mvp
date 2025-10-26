@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import { unauthorized } from "next/navigation"
 import { TasksCarousel } from "@/components/business/carousel"
-import type { Task, Client } from "@/types/entities"
+import type { Task, Client, Contact } from "@/types/entities"
 import FormNewTaskDialog from "@/components/forms/form-new-task"
 import axiosApi from "@/lib/axios"
 import TasksLoading from "./loading"
@@ -28,7 +28,9 @@ export default function TasksPage() {
   const [tasks, setTasks] = useState<Task[] | null>(null)
   const [loading, setLoading] = useState(true)
   const [clients, setClients] = useState<Client[]>([])
-  const [clientsLoading, setClientsLoading] = useState(true)
+  const [clientsLoading, setClientsLoading] = useState(false)
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [contactsLoading, setContactsLoading] = useState(false)
   const [typeFilter, setTypeFilter] = useState<string>("ALL")
   const [clientNameFilter, setClientNameFilter] = useState("")
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
@@ -51,6 +53,14 @@ export default function TasksPage() {
       .finally(() => setClientsLoading(false))
   }
 
+  const fetchContacts = () => {
+    setContactsLoading(true)
+    axiosApi
+      .get("/api/contact")
+      .then((res) => setContacts(res.data))
+      .finally(() => setContactsLoading(false))
+  }
+
   useEffect(() => {
     if (user && !isPending) {
       fetchTasks()
@@ -59,6 +69,7 @@ export default function TasksPage() {
 
   useEffect(() => {
     fetchClients()
+    fetchContacts()
   }, [])
 
   const filteredTasks = tasks
@@ -79,7 +90,7 @@ export default function TasksPage() {
         : new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
     )
 
-  if (loading || clientsLoading) return <TasksLoading />
+  if (loading || clientsLoading || contactsLoading) return <TasksLoading />
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -89,6 +100,7 @@ export default function TasksPage() {
           {user && (
             <FormNewTaskDialog
               clients={clients}
+              contacts={contacts}
               userId={user?.user.id}
               onSuccess={() => fetchTasks()}
               triggerLabel="Add New Task"

@@ -11,7 +11,7 @@ import { format } from "date-fns"
 import FormTaskEditDialog from "@/components/forms/form-task-edit"
 import FormNewTaskDialog from "@/components/forms/form-new-task"
 import FormTaskTransferDialog from "@/components/forms/form-task-transfer"
-import type { Task, Client } from "@/types/entities"
+import type { Task, Client, Contact } from "@/types/entities"
 import { unauthorized, notFound } from "next/navigation"
 import TaskLoading from "./loading"
 import axiosApi from "@/lib/axios"
@@ -33,9 +33,11 @@ export default function TaskPage() {
   const [task, setTask] = useState<Task | null>(null)
   const [loading, setLoading] = useState(true)
   const [clients, setClients] = useState<Client[]>([])
-  const [clientsLoading, setClientsLoading] = useState(true)
+  const [clientsLoading, setClientsLoading] = useState(false)
   const [users, setUsers] = useState<User[]>([])
-  const [loadingUsers, setLoadingUsers] = useState(true)
+  const [loadingUsers, setLoadingUsers] = useState(false)
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [loadingContacts, setLoadingContacts] = useState(false)
 
   const fetchTask = () => {
     setLoading(true)
@@ -51,6 +53,14 @@ export default function TaskPage() {
       .get("/api/client")
       .then((res) => setClients(res.data))
       .finally(() => setClientsLoading(false))
+  }
+
+  const fetchContacts = () => {
+    setLoadingContacts(true)
+    axiosApi
+      .get("/api/contact")
+      .then((res) => setContacts(res.data))
+      .finally(() => setLoadingContacts(false))
   }
 
   const fetchUsers = async () => {
@@ -70,9 +80,11 @@ export default function TaskPage() {
     fetchTask()
     fetchClients()
     fetchUsers()
+    fetchContacts()
   }, [id, router])
 
-  if (loading || clientsLoading || loadingUsers) return <TaskLoading />
+  if (loading || clientsLoading || loadingUsers || loadingContacts)
+    return <TaskLoading />
   if (!user && !isPending) {
     unauthorized()
   }
@@ -80,7 +92,7 @@ export default function TaskPage() {
     notFound()
   }
 
-  // console.log("TASK", task)
+  console.log("TASK", task)
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -143,22 +155,46 @@ export default function TaskPage() {
               <div className="pr-2 text-sm text-gray-500">Task Name:</div>
               <div className="text-lg">{task.theme || "—"}</div>
 
-              <div className="pr-2 text-sm text-gray-500">Client:</div>
-              <div className="text-lg">{task.client?.name || "—"}</div>
-
               <div className="pr-2 text-sm text-gray-500">Due Date:</div>
               <div className="text-lg">
                 {task.date ? format(new Date(task.date), "dd.MM.yyyy") : "—"}
               </div>
 
-              <div className="pr-2 text-sm text-gray-500">Contact Person:</div>
-              <div className="text-lg">{task.contactPerson || "—"}</div>
+              {task.client && (
+                <>
+                  <div className="pr-2 text-sm text-gray-500">Client name:</div>
+                  <div className="text-lg">{task.client?.name || "—"}</div>
 
-              <div className="pr-2 text-sm text-gray-500">Contact Email:</div>
-              <div className="text-lg">{task.contactEmail || "—"}</div>
+                  <div className="pr-2 text-sm text-gray-500">
+                    Client Phone:
+                  </div>
+                  <div className="text-lg">{task.client?.phone || "—"}</div>
 
-              <div className="pr-2 text-sm text-gray-500">Contact Phone:</div>
-              <div className="text-lg">{task.contactPhone || "—"}</div>
+                  <div className="pr-2 text-sm text-gray-500">
+                    Client Email:
+                  </div>
+                  <div className="text-lg">{task.client?.email || "—"}</div>
+                </>
+              )}
+
+              {task.contact && (
+                <>
+                  <div className="pr-2 text-sm text-gray-500">
+                    Contact name:
+                  </div>
+                  <div className="text-lg">{task.contact?.name || "—"}</div>
+
+                  <div className="pr-2 text-sm text-gray-500">
+                    Contact Phone:
+                  </div>
+                  <div className="text-lg">{task.contact?.phone || "—"}</div>
+
+                  <div className="pr-2 text-sm text-gray-500">
+                    Contact Email:
+                  </div>
+                  <div className="text-lg">{task.contact?.email || "—"}</div>
+                </>
+              )}
 
               <div className="pr-2 text-sm text-gray-500">Meeting URL:</div>
               <div className="text-base">
@@ -246,12 +282,14 @@ export default function TaskPage() {
             <FormTaskEditDialog
               task={task}
               clients={clients}
+              contacts={contacts}
               onSuccess={fetchTask}
             />
 
             {user?.user.id && (
               <FormNewTaskDialog
                 clients={clients}
+                contacts={contacts}
                 userId={user?.user.id}
                 onSuccess={fetchTask}
                 triggerLabel="Add Linked Task"

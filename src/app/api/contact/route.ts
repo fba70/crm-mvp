@@ -9,19 +9,14 @@ export async function GET() {
   }
 
   try {
-    const clients = await prisma.client.findMany({
+    const contacts = await prisma.contact.findMany({
       orderBy: { name: "asc" },
-      include: {
-        tasks: true, // Include related tasks
-        feeds: true, // Include related feeds
-        contacts: true, // Include related contacts
-      },
     })
-    return NextResponse.json(clients)
+    return NextResponse.json(contacts)
   } catch (error) {
-    console.error("Error fetching clients:", error)
+    console.error("Error fetching contacts:", error)
     return NextResponse.json(
-      { error: "Failed to fetch clients" },
+      { error: "Failed to fetch contacts" },
       { status: 500 },
     )
   }
@@ -36,13 +31,13 @@ export async function POST(req: NextRequest) {
 
     const data = await req.json()
 
-    const newClient = await prisma.client.create({ data })
+    const newContact = await prisma.contact.create({ data })
 
-    return NextResponse.json(newClient, { status: 201 })
+    return NextResponse.json(newContact, { status: 201 })
   } catch (error) {
-    console.error("Client create error", error)
+    console.error("Contact create error", error)
     return NextResponse.json(
-      { error: "Failed to create client" },
+      { error: "Failed to create contact" },
       { status: 500 },
     )
   }

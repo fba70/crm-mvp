@@ -1,6 +1,7 @@
 "use client"
-import { useForm } from "react-hook-form"
-import { useTransition, useState } from "react"
+
+import { useEffect, useState, useTransition } from "react"
+import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import {
@@ -25,7 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select"
-import type { Task, Client } from "@/types/entities"
+import type { Task, Client, Contact } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 
@@ -42,16 +43,19 @@ type TaskEditFormFields = {
   urlLink?: string
   statusChangeReason?: string
   clientId?: string
+  contactId?: string
 }
 
 export default function FormTaskEditDialog({
   task,
   clients,
+  contacts,
   onSuccess,
   triggerLabel = "Edit Task",
 }: {
   task: Task
   clients: Client[]
+  contacts: Contact[]
   onSuccess: (t: Task) => void
   triggerLabel?: string
 }) {
@@ -73,10 +77,30 @@ export default function FormTaskEditDialog({
       urlLink: task.urlLink || "",
       statusChangeReason: task.statusChangeReason || "",
       clientId: task.clientId || "",
+      contactId: task.contactId || "",
     },
   })
 
-  // console.log("TASK data", task)
+  const { control, setValue } = form
+
+  // Watch for changes to the contactId field
+  const selectedContactId = useWatch({
+    control,
+    name: "contactId",
+  })
+
+  // Autofill clientId based on the selected contactId
+  useEffect(() => {
+    const selectedContact = contacts.find(
+      (contact) => contact.id === selectedContactId,
+    )
+
+    if (selectedContact?.clientId) {
+      setValue("clientId", selectedContact.clientId) // Autofill clientId
+    } else {
+      setValue("clientId", "") // Clear clientId if no client reference
+    }
+  }, [selectedContactId, contacts, setValue])
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -85,7 +109,11 @@ export default function FormTaskEditDialog({
   const onSubmit = (data: TaskEditFormFields) => {
     setError(null)
     startTransition(async () => {
-      const payload = { ...data }
+      const payload = {
+        ...data,
+        clientId: data.clientId === "No client" ? null : data.clientId, // Convert empty value to null
+        contactId: data.contactId === "No contact" ? null : data.contactId, // Convert empty value to null
+      }
       if (payload.date) {
         payload.date = new Date(payload.date).toISOString()
       }
@@ -217,6 +245,7 @@ export default function FormTaskEditDialog({
                 )}
               />
             </div>
+
             <FormField
               control={form.control}
               name="theme"
@@ -230,33 +259,66 @@ export default function FormTaskEditDialog({
                 </FormItem>
               )}
             />
-            <FormField
-              control={form.control}
-              name="clientId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">Client</FormLabel>
-                  <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value || ""}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select client" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            {client.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+
+            <div className="flex items-center justify-between">
+              <FormField
+                control={form.control}
+                name="clientId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Client</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select client" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="No client">No client</SelectItem>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              {client.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="contactId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel className="text-gray-500">Contact</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value || ""}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select contact" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="No contact">No contact</SelectItem>
+                          {contacts.map((contact) => (
+                            <SelectItem key={contact.id} value={contact.id}>
+                              {contact.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
             <FormField
               control={form.control}
               name="date"
@@ -270,7 +332,59 @@ export default function FormTaskEditDialog({
                 </FormItem>
               )}
             />
+
             <FormField
+              control={form.control}
+              name="urlLink"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">T-con URL</FormLabel>
+                  <FormControl>
+                    <Input type="url" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="address"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">Address</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            {error && <div className="text-sm text-red-500">{error}</div>}
+
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setOpen(false)}
+                disabled={isPending}
+              >
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Saving..." : "Save"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+/*
+<FormField
               control={form.control}
               name="contactPerson"
               render={({ field }) => (
@@ -317,52 +431,4 @@ export default function FormTaskEditDialog({
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="address"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">Address</FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="urlLink"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">T-con URL</FormLabel>
-                  <FormControl>
-                    <Input type="url" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            {error && <div className="text-sm text-red-500">{error}</div>}
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setOpen(false)}
-                disabled={isPending}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isPending}>
-                {isPending ? "Saving..." : "Save"}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
-  )
-}
+*/

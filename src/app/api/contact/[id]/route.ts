@@ -8,22 +8,17 @@ export async function GET(
   const { id } = await params
 
   try {
-    const client = await prisma.client.findUnique({
+    const contact = await prisma.contact.findUnique({
       where: { id },
-      include: {
-        tasks: true, // Include related tasks
-        feeds: true, // Include related feeds
-        contacts: true, // Include related contacts
-      },
     })
-    if (!client) {
-      return NextResponse.json({ error: "Client not found" }, { status: 404 })
+    if (!contact) {
+      return NextResponse.json({ error: "Contact not found" }, { status: 404 })
     }
-    return NextResponse.json(client)
+    return NextResponse.json(contact)
   } catch (error) {
-    console.log("Client fetch error", error)
+    console.log("Contact fetch error", error)
     return NextResponse.json(
-      { error: "Failed to fetch client" },
+      { error: "Failed to fetch contact" },
       { status: 500 },
     )
   }
@@ -38,15 +33,15 @@ export async function PATCH(
   const data = await req.json()
 
   try {
-    const updatedClient = await prisma.client.update({
+    const updatedContact = await prisma.contact.update({
       where: { id },
       data,
     })
-    return NextResponse.json(updatedClient)
+    return NextResponse.json(updatedContact)
   } catch (error) {
-    console.log("Client update error", error)
+    console.log("Contact update error", error)
     return NextResponse.json(
-      { error: "Failed to update client" },
+      { error: "Failed to update contact" },
       { status: 500 },
     )
   }

@@ -28,6 +28,7 @@ export async function GET(req: NextRequest) {
     },
     include: {
       client: true,
+      contact: true,
       createdBy: true,
       assignedTo: true,
       linkedTasks: true,

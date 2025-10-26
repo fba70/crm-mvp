@@ -35,6 +35,20 @@ export type Task = {
   assignedToId?: string | null
   createdAt: string | Date
   updatedAt: string | Date
+  contactId?: string | null
+  contact?: {
+    id: string
+    name: string
+    phone?: string | null
+    email?: string | null
+    position?: string | null
+    createdAt: Date
+    updatedAt: Date
+    clientId?: string | null
+    client?: Client | null
+    createdById: string | null
+    createdBy: User | null
+  } | null
 }
 
 export type Client = {
@@ -45,6 +59,11 @@ export type Client = {
   address?: string | null
   createdAt: string | Date
   updatedAt: string | Date
+  createdById?: string | null
+  createdBy?: User | null
+  tasks?: Task[]
+  feeds?: Feed[]
+  contacts?: Contact[]
 }
 
 export enum FeedType {
@@ -86,4 +105,18 @@ export interface Like {
   userId: string
   feedId: string
   createdAt: Date
+}
+
+export type Contact = {
+  id: string
+  name: string
+  phone?: string | null
+  email?: string | null
+  position?: string | null
+  createdAt: Date
+  updatedAt: Date
+  clientId?: string | null
+  client?: Client | null
+  createdById: string | null
+  createdBy: User | null
 }

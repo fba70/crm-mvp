@@ -59,7 +59,7 @@ export default function FormClientEditDialog({
       }
 
       try {
-        const res = await axiosApi.post(`/api/client/${client.id}`, payload)
+        const res = await axiosApi.patch(`/api/client/${client.id}`, payload)
         onSuccess(res.data)
         toast.success("Client updated successfully")
         setOpen(false)
@@ -80,7 +80,7 @@ export default function FormClientEditDialog({
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Edit Task</DialogTitle>
+          <DialogTitle>Edit Client Data</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form

@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useSession } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
 import { unauthorized } from "next/navigation"
-import { FeedStatus, type Feed, Client } from "@/types/entities"
+import { FeedStatus, type Feed, Client, Contact } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import FeedLoading from "./loading"
 import { Card, CardContent } from "@/components/ui/card"
@@ -31,6 +31,7 @@ import FormNewFeedDialog from "@/components/forms/form-new-feed"
 import BookingRequestDialog from "@/components/forms/form-booking-request"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
+import { toast } from "sonner"
 
 export default function FeedPage() {
   const { data: user, isPending } = useSession()
@@ -40,11 +41,13 @@ export default function FeedPage() {
   }
 
   const [feed, setFeed] = useState<Feed[]>([])
-  const [feedLoading, setFeedLoading] = useState(true)
+  const [feedLoading, setFeedLoading] = useState(false)
   const [typeFilter, setTypeFilter] = useState<string | null>(null)
   const [statusFilter, setStatusFilter] = useState<string | null>(null)
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
   const [includeClosed, setIncludeClosed] = useState(false)
+  const [contacts, setContacts] = useState<Contact[]>([])
+  const [contactsLoading, setContactsLoading] = useState(false)
 
   const fetchFeed = () => {
     setFeedLoading(true)
@@ -54,8 +57,17 @@ export default function FeedPage() {
       .finally(() => setFeedLoading(false))
   }
 
+  const fetchContacts = () => {
+    setContactsLoading(true)
+    axiosApi
+      .get("/api/contact")
+      .then((res) => setContacts(res.data))
+      .finally(() => setContactsLoading(false))
+  }
+
   useEffect(() => {
     fetchFeed()
+    fetchContacts()
   }, [])
 
   const filteredFeed = feed.filter((item) => {
@@ -73,7 +85,7 @@ export default function FeedPage() {
 
   // console.log("Feed:", feed)
 
-  if (feedLoading) return <FeedLoading />
+  if (feedLoading || contactsLoading) return <FeedLoading />
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -154,7 +166,11 @@ export default function FeedPage() {
             No feed found.
           </p>
         ) : (
-          <FeedCards feed={sortedFilteredFeed} setFeed={setFeed} />
+          <FeedCards
+            feed={sortedFilteredFeed}
+            setFeed={setFeed}
+            contacts={contacts}
+          />
         )}
       </div>
     </main>
@@ -163,9 +179,11 @@ export default function FeedPage() {
 
 function FeedCards({
   feed,
+  contacts,
   setFeed,
 }: {
   feed: Feed[]
+  contacts: Contact[]
   setFeed: React.Dispatch<React.SetStateAction<Feed[]>>
 }) {
   const router = useRouter()
@@ -188,6 +206,8 @@ function FeedCards({
       ),
     )
   }
+
+  // console.log("FEED TO RENDER", feed)
 
   return (
     <div className="flex flex-col items-center justify-center">
@@ -246,8 +266,10 @@ function FeedCards({
                       updateFeedItem(feedItem.id, {
                         status: FeedStatus.CLOSED,
                       })
+                      toast.success("Feed item closed successfully.")
                     } catch (error) {
                       console.error("Failed to close the feed item:", error)
+                      toast.error("Failed to close the feed item.")
                     }
                   }}
                 >
@@ -333,6 +355,7 @@ function FeedCards({
                               )
                             : clients
                         }
+                        contacts={contacts}
                         userId={user?.user.id}
                         onSuccess={(newTask) => {
                           updateFeedItem(feedItem.id, { taskId: newTask.id })

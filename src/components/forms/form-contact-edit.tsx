@@ -18,30 +18,41 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { Client } from "@/types/entities"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import type { Client, Contact } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 
-type ClientEditFormFields = {
+type ContactEditFormFields = {
   name: string
   email?: string
   phone?: string
-  address?: string
+  position?: string
+  clientId?: string
 }
 
-export default function FormNewClientDialog({
-  userId,
+export default function FormContactEditDialog({
+  contact,
+  clients,
   onSuccess,
 }: {
-  userId: string
-  onSuccess: (t: Client) => void
+  contact: Contact
+  clients: Client[]
+  onSuccess: (t: Contact) => void
 }) {
-  const form = useForm<ClientEditFormFields>({
+  const form = useForm<ContactEditFormFields>({
     defaultValues: {
-      name: "",
-      email: "",
-      phone: "",
-      address: "",
+      name: contact.name,
+      email: contact?.email || "",
+      phone: contact?.phone || "",
+      position: contact?.position || "",
+      clientId: contact?.clientId || undefined,
     },
   })
 
@@ -49,23 +60,23 @@ export default function FormNewClientDialog({
   const [open, setOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  const onSubmit = (data: ClientEditFormFields) => {
+  const onSubmit = (data: ContactEditFormFields) => {
     setError(null)
     startTransition(async () => {
       const payload = {
         ...data,
-        createdById: userId,
+        clientId: data.clientId === "No Client" ? null : data.clientId, // Check for "No Client" and set to null
       }
 
       try {
-        const res = await axiosApi.post(`/api/client/`, payload)
+        const res = await axiosApi.patch(`/api/contact/${contact.id}`, payload)
         onSuccess(res.data)
-        toast.success("Client created successfully")
+        toast.success("Contact updated successfully")
         setOpen(false)
       } catch (err) {
-        console.log("Client create error", err)
-        setError("Failed to create client")
-        toast.error("Failed to create client")
+        console.log("Contact update error", err)
+        setError("Failed to update contact")
+        toast.error("Failed to update contact")
       }
     })
   }
@@ -73,13 +84,13 @@ export default function FormNewClientDialog({
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button variant="outline" className="">
-          Add New Client (admin)
+        <Button variant="default" className="">
+          Edit
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Add New Client</DialogTitle>
+          <DialogTitle>Edit Contact</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form
@@ -128,12 +139,40 @@ export default function FormNewClientDialog({
             />
             <FormField
               control={form.control}
-              name="address"
+              name="position"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel className="text-gray-500">Address</FormLabel>
+                  <FormLabel className="text-gray-500">Position</FormLabel>
                   <FormControl>
                     <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="clientId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">Client</FormLabel>
+                  <FormControl>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value || "No Client"}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select client" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="No Client">No Client</SelectItem>
+                        {clients.map((client) => (
+                          <SelectItem key={client.id} value={client.id}>
+                            {client.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </FormControl>
                   <FormMessage />
                 </FormItem>
