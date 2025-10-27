@@ -120,3 +120,23 @@ export type Contact = {
   createdById: string | null
   createdBy: User | null
 }
+
+export enum NotificationType {
+  GENERAL = "GENERAL",
+  FEED = "FEED",
+  TRANSFER = "TRANSFER",
+  ACCEPTED = "ACCEPTED",
+  REJECTED = "REJECTED",
+}
+
+export type Notification = {
+  id: string
+  recipientId?: string | null
+  senderId?: string | null
+  sender?: User | null
+  message?: string | null
+  type: NotificationType
+  read: boolean
+  createdAt: Date
+  updatedAt: Date
+}

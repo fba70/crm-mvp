@@ -28,7 +28,7 @@ import {
 import { Checkbox } from "@/components/ui/checkbox"
 import { Textarea } from "@/components/ui/textarea"
 import type { Client, Feed } from "@/types/entities"
-import { FeedType, FeedStatus } from "@/types/entities"
+import { FeedType, FeedStatus, NotificationType } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 
@@ -79,10 +79,29 @@ export default function FormNewFeedDialog({
         taskId: undefined,
       }
 
+      const notificationPayload = {
+        senderId: null,
+        recipientId: null,
+        message: data.metadata,
+        type: NotificationType.FEED,
+        read: false,
+      }
+
       try {
         const res = await axiosApi.post(`/api/feed/`, payload)
         onSuccess(res.data)
         toast.success("Feed created successfully")
+
+        try {
+          await axiosApi.post("/api/notification", notificationPayload)
+          toast.success("Notification sent successfully")
+        } catch (notificationError) {
+          console.error("Failed to send notification:", notificationError)
+          toast.error(
+            "Task transfer succeeded, but sending notification failed",
+          )
+        }
+
         setOpen(false)
       } catch (err) {
         console.log("Feed create error", err)

@@ -6,7 +6,7 @@ import { useSession } from "@/lib/auth-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import RouteButton from "@/components/business/route-button"
 import { Badge } from "@/components/ui/badge"
-import { ChevronsRight } from "lucide-react"
+import { ChevronsRight, ExternalLink, Mail, Phone } from "lucide-react"
 import { format } from "date-fns"
 import FormTaskEditDialog from "@/components/forms/form-task-edit"
 import FormNewTaskDialog from "@/components/forms/form-new-task"
@@ -92,7 +92,7 @@ export default function TaskPage() {
     notFound()
   }
 
-  console.log("TASK", task)
+  // console.log("TASK", task)
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -168,12 +168,36 @@ export default function TaskPage() {
                   <div className="pr-2 text-sm text-gray-500">
                     Client Phone:
                   </div>
-                  <div className="text-lg">{task.client?.phone || "—"}</div>
+                  <div className="flex items-center gap-3 text-lg">
+                    <span className="w-[180px] overflow-hidden">
+                      {task.client?.phone || "—"}
+                    </span>
+                    <a
+                      href={`tel:${task.client?.phone ?? ""}`}
+                      onClick={(e) => {
+                        if (!task.client?.phone) e.preventDefault()
+                      }}
+                    >
+                      <Phone className="h-5 w-5 text-blue-500" />
+                    </a>
+                  </div>
 
                   <div className="pr-2 text-sm text-gray-500">
                     Client Email:
                   </div>
-                  <div className="text-lg">{task.client?.email || "—"}</div>
+                  <div className="flex items-center gap-3 text-lg">
+                    <span className="w-[180px] overflow-hidden">
+                      {task.client?.email || "—"}
+                    </span>
+                    <a
+                      href={`mailto:${task.client?.email ?? ""}`}
+                      onClick={(e) => {
+                        if (!task.client?.email) e.preventDefault()
+                      }}
+                    >
+                      <Mail className="h-5 w-5 text-blue-500" />
+                    </a>
+                  </div>
                 </>
               )}
 
@@ -187,12 +211,36 @@ export default function TaskPage() {
                   <div className="pr-2 text-sm text-gray-500">
                     Contact Phone:
                   </div>
-                  <div className="text-lg">{task.contact?.phone || "—"}</div>
+                  <div className="flex items-center gap-3 text-lg">
+                    <span className="w-[180px] overflow-hidden">
+                      {task.contact?.phone || "—"}
+                    </span>
+                    <a
+                      href={`tel:${task.contact?.phone ?? ""}`}
+                      onClick={(e) => {
+                        if (!task.contact?.phone) e.preventDefault()
+                      }}
+                    >
+                      <Phone className="h-5 w-5 text-blue-500" />
+                    </a>
+                  </div>
 
                   <div className="pr-2 text-sm text-gray-500">
                     Contact Email:
                   </div>
-                  <div className="text-lg">{task.contact?.email || "—"}</div>
+                  <div className="flex items-center gap-3 text-lg">
+                    <span className="w-[180px] overflow-hidden">
+                      {task.contact?.email || "—"}
+                    </span>
+                    <a
+                      href={`mailto:${task.contact?.email ?? ""}`}
+                      onClick={(e) => {
+                        if (!task.contact?.email) e.preventDefault()
+                      }}
+                    >
+                      <Mail className="h-5 w-5 text-blue-500" />
+                    </a>
+                  </div>
                 </>
               )}
 
@@ -201,11 +249,14 @@ export default function TaskPage() {
                 {task.urlLink ? (
                   <a
                     href={task.urlLink}
-                    className="text-blue-600 underline"
                     target="_blank"
                     rel="noopener noreferrer"
+                    className="flex items-center gap-3 text-gray-500"
                   >
-                    {task.urlLink}
+                    <span className="w-[180px] overflow-hidden">
+                      Conference link
+                    </span>
+                    <ExternalLink className="h-5 w-5 text-blue-500" />
                   </a>
                 ) : (
                   "—"
@@ -299,6 +350,7 @@ export default function TaskPage() {
 
             <FormTaskTransferDialog
               taskId={task.id}
+              userId={user?.user.id || ""}
               onSuccess={fetchTask}
               triggerLabel="Transfer Task"
             />

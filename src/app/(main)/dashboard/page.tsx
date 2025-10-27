@@ -1,7 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 
-import { MailIcon, ClipboardList } from "lucide-react"
+import { MailIcon, ClipboardList, MessageSquareQuote } from "lucide-react"
 import type { Metadata } from "next"
 import Link from "next/link"
 import BudgetCharts from "@/components/business/budget-charts"
@@ -128,7 +128,7 @@ function TasksSummary({
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <ClipboardList size={24} />
-          Tasks Summary Information
+          Tasks Summary
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -180,8 +180,8 @@ function FeedSummary({
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <ClipboardList size={24} />
-          Tasks Summary Information
+          <MessageSquareQuote size={24} />
+          Feed Summary
         </CardTitle>
       </CardHeader>
       <CardContent className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">

@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
-import type { Task } from "@/types/entities"
+import { NotificationType, type Task } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea"
@@ -32,9 +32,13 @@ type TaskStatusUpdateFields = {
 
 export default function FormTaskTransferManageDialog({
   task,
+  recipientId,
+  senderId,
   onSuccess,
 }: {
   task: Task
+  recipientId: string
+  senderId: string
   onSuccess: (t: Task) => void
 }) {
   const form = useForm<TaskStatusUpdateFields>({
@@ -53,9 +57,51 @@ export default function FormTaskTransferManageDialog({
     startTransition(async () => {
       const payload = { ...data }
 
+      let notificationPayload: {
+        senderId: string
+        recipientId: string
+        message: string
+        type: NotificationType
+        read: boolean
+      } = {
+        senderId: senderId,
+        recipientId: recipientId,
+        message: "Default notification message",
+        type: NotificationType.GENERAL, // Use a default type
+        read: false,
+      }
+
+      if (data.transferStatus === "ACCEPTED") {
+        notificationPayload = {
+          senderId: senderId,
+          recipientId: recipientId,
+          message: data.rejectionReason || "Task transfer accepted",
+          type: NotificationType.ACCEPTED,
+          read: false,
+        }
+      } else if (data.transferStatus === "REJECTED") {
+        notificationPayload = {
+          senderId: senderId,
+          recipientId: recipientId,
+          message: data.rejectionReason || "Task transfer rejected",
+          type: NotificationType.REJECTED,
+          read: false,
+        }
+      }
+
       try {
         const res = await axiosApi.patch(`/api/task/${task.id}`, payload)
         onSuccess(res.data)
+
+        // Add notification record
+        try {
+          await axiosApi.post("/api/notification", notificationPayload)
+          toast.success("Task transfer status updated, and notification sent")
+        } catch (notificationError) {
+          console.error("Failed to create notification:", notificationError)
+          toast.error("Task transfer status updated, but notification failed")
+        }
+
         toast.success("Task transfer status updated successfully")
         setIsOpen(false) // Close the dialog on success
       } catch (err) {

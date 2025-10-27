@@ -24,7 +24,7 @@ export async function Navbar() {
           <span className="text-xl font-semibold text-white">CRM APP</span>
         </Link>
         <div className="flex items-center gap-2">
-          <NewsDrawer />
+          <NewsDrawer userId={user?.id} />
           <ModeToggle />
           <UserDropdown user={user} />
         </div>

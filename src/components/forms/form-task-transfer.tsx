@@ -19,7 +19,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import type { Task } from "@/types/entities"
+import { NotificationType, type Task } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 import {
@@ -44,10 +44,12 @@ type User = {
 
 export default function FormTaskTransferDialog({
   taskId,
+  userId,
   onSuccess,
   triggerLabel = "Task Transfer",
 }: {
   taskId: string
+  userId: string
   onSuccess: (t: Task) => void
   triggerLabel?: string
 }) {
@@ -89,10 +91,29 @@ export default function FormTaskTransferDialog({
         transferStatus: "UNDEFINED",
       }
 
+      const notificationPayload = {
+        senderId: userId,
+        recipientId: data.transferToId,
+        message: data.transferToReason,
+        type: NotificationType.TRANSFER,
+        read: false,
+      }
+
       try {
         const res = await axiosApi.patch(`/api/task/${taskId}`, payload)
         onSuccess(res.data)
         toast.success("Task transfer initiated successfully")
+
+        try {
+          await axiosApi.post("/api/notification", notificationPayload)
+          toast.success("Notification sent successfully")
+        } catch (notificationError) {
+          console.error("Failed to send notification:", notificationError)
+          toast.error(
+            "Task transfer succeeded, but sending notification failed",
+          )
+        }
+
         setOpen(false)
       } catch (err) {
         console.log("Task transfer initiation error", err)

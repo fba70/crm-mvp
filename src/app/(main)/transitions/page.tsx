@@ -192,6 +192,8 @@ export default function TaskTransitionsPage() {
                           </Button>
                           <FormTaskTransferManageDialog
                             task={task}
+                            recipientId={task.transferToId || ""}
+                            senderId={task.createdById}
                             onSuccess={(updatedTask) => {
                               setTasks(
                                 (prevTasks) =>
@@ -326,6 +328,8 @@ export default function TaskTransitionsPage() {
                           </Button>
                           <FormTaskTransferManageDialog
                             task={task}
+                            recipientId={task.transferToId || ""}
+                            senderId={task.createdById}
                             onSuccess={(updatedTask) => {
                               setTasks(
                                 (prevTasks) =>
