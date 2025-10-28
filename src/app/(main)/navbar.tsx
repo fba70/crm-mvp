@@ -1,10 +1,10 @@
 import { CalendarCheck } from "lucide-react"
-import { ModeToggle } from "@/components/mode-toggle"
 import { UserDropdown } from "@/components/user-dropdown"
 import Link from "next/link"
 import { getServerSession } from "@/lib/get-session"
 import { unauthorized } from "next/navigation"
 import NewsDrawer from "@/components/business/news-drawer"
+// import { ModeToggle } from "@/components/mode-toggle"
 
 export async function Navbar() {
   const session = await getServerSession()
@@ -25,10 +25,12 @@ export async function Navbar() {
         </Link>
         <div className="flex items-center gap-2">
           <NewsDrawer userId={user?.id} />
-          <ModeToggle />
+
           <UserDropdown user={user} />
         </div>
       </div>
     </header>
   )
 }
+
+// <ModeToggle />
