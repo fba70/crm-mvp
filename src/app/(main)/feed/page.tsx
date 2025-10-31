@@ -367,14 +367,13 @@ function FeedCards({
                   )}
 
                   {(feedItem.feedback || feedItem.feedbackBooking) && (
-                    <Button variant="outline">
-                      <Brain
-                        size={24}
-                        className="text-blue-500"
-                        onClick={() => {
-                          router.push(`/feed/${feedItem.id}`)
-                        }}
-                      />
+                    <Button
+                      variant="outline"
+                      onClick={() => {
+                        router.push(`/feed/${feedItem.id}`)
+                      }}
+                    >
+                      <Brain size={24} className="text-blue-500" />
                     </Button>
                   )}
                 </div>
