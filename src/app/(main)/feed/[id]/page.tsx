@@ -240,13 +240,27 @@ export default function FeedItemPage() {
           <CardContent className="flex flex-col gap-2 px-5 py-0">
             <div className="flex flex-row items-center justify-between gap-2">
               <div className="flex flex-row items-center justify-center gap-2">
-                <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-xs">
-                  {feedItem.type.replace(/_/g, " ")}
+                <div
+                  className={cn(
+                    "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm",
+                    feedItem.type === "RECOMMENDATION" &&
+                      "bg-gradient-to-t from-blue-100 to-transparent",
+                    feedItem.type === "CLIENT_ACTIVITY" &&
+                      "bg-gradient-to-t from-cyan-100 to-transparent",
+                    feedItem.type === "INDUSTRY_INFO" &&
+                      "bg-gradient-to-t from-pink-100 to-transparent",
+                    feedItem.type === "COLLEAGUES_UPDATE" &&
+                      "bg-gradient-to-t from-green-100 to-transparent",
+                  )}
+                >
+                  {feedItem.type
+                    .replace("COLLEAGUES_UPDATE", "COLLEAGUES")
+                    .replace(/_/g, " ")}
                 </div>
 
                 <div
                   className={cn(
-                    "rounded-xl border-1 border-gray-300 px-2 py-1 text-xs",
+                    "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm",
                     feedItem.status === "CANCELLED" && "text-gray-500",
                     feedItem.status === "IN_PROGRESS" && "text-blue-500",
                     feedItem.status === "ACTION_COMPLETED" && "text-green-400",
@@ -289,7 +303,7 @@ export default function FeedItemPage() {
               )}
             </div>
 
-            <div className="flex flex-row items-center justify-start gap-3">
+            <div className="mb-1 flex flex-row items-center justify-start gap-3">
               <span className="w-[60px] text-sm text-gray-400">Message:</span>
               <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
                 {feedItem.metadata || "No message"}
@@ -319,7 +333,7 @@ export default function FeedItemPage() {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  <span className="block max-h-20 w-[290px] overflow-y-auto text-sm">
+                  <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
                     {feedItem.feedback || "No message"}
                   </span>
                 </div>
@@ -347,14 +361,14 @@ export default function FeedItemPage() {
                       </div>
                     </DialogContent>
                   </Dialog>
-                  <span className="block max-h-20 w-[290px] overflow-y-auto text-sm">
+                  <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
                     {feedItem.feedbackBooking || "No message"}
                   </span>
                 </div>
               </div>
             )}
 
-            <div className="flex flex-row items-center justify-between gap-2">
+            <div className="mt-2 flex flex-row items-center justify-between gap-2">
               <div className="flex flex-row items-center justify-start gap-3">
                 <span className="w-[60px] text-sm text-gray-400">Actions:</span>
                 {feedItem.actionCall && (

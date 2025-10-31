@@ -213,8 +213,8 @@ function FeedCards({
     <div className="flex flex-col items-center justify-center">
       <div className="grid h-[680px] w-[95%] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {feed.map((feedItem) => (
-          <Card key={feedItem.id} className="py-4">
-            <CardContent className="flex flex-col gap-2 px-4 py-0">
+          <Card key={feedItem.id} className="py-3">
+            <CardContent className="flex flex-col gap-1 px-4 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center justify-center gap-2">
                   <div
@@ -230,7 +230,9 @@ function FeedCards({
                         "bg-gradient-to-t from-green-100 to-transparent",
                     )}
                   >
-                    {feedItem.type.replace(/_/g, " ")}
+                    {feedItem.type
+                      .replace("COLLEAGUES_UPDATE", "COLLEAGUES")
+                      .replace(/_/g, " ")}
                   </div>
 
                   <div
