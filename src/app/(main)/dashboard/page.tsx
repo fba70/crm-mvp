@@ -194,7 +194,7 @@ function FeedSummary({
           </p>
 
           <Button className="ml-auto" asChild>
-            <Link href="/feed">View News Feed</Link>
+            <Link href="/feed">View Feed</Link>
           </Button>
         </div>
         <div className="flex flex-row gap-2 sm:items-start">

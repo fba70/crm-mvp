@@ -213,24 +213,23 @@ function FeedCards({
     <div className="flex flex-col items-center justify-center">
       <div className="grid h-[680px] w-[95%] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
         {feed.map((feedItem) => (
-          <Card
-            key={feedItem.id}
-            className={cn(
-              "py-4",
-              feedItem.type === "RECOMMENDATION" &&
-                "bg-gradient-to-t from-blue-100 to-transparent",
-              feedItem.type === "CLIENT_ACTIVITY" &&
-                "bg-gradient-to-t from-cyan-100 to-transparent",
-              feedItem.type === "INDUSTRY_INFO" &&
-                "bg-gradient-to-t from-pink-100 to-transparent",
-              feedItem.type === "COLLEAGUES_UPDATE" &&
-                "bg-gradient-to-t from-green-100 to-transparent",
-            )}
-          >
+          <Card key={feedItem.id} className="py-4">
             <CardContent className="flex flex-col gap-2 px-4 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="flex flex-row items-center justify-center gap-2">
-                  <div className="rounded-xl border-1 border-gray-300 px-2 py-1 text-sm">
+                  <div
+                    className={cn(
+                      "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm",
+                      feedItem.type === "RECOMMENDATION" &&
+                        "bg-gradient-to-t from-blue-100 to-transparent",
+                      feedItem.type === "CLIENT_ACTIVITY" &&
+                        "bg-gradient-to-t from-cyan-100 to-transparent",
+                      feedItem.type === "INDUSTRY_INFO" &&
+                        "bg-gradient-to-t from-pink-100 to-transparent",
+                      feedItem.type === "COLLEAGUES_UPDATE" &&
+                        "bg-gradient-to-t from-green-100 to-transparent",
+                    )}
+                  >
                     {feedItem.type.replace(/_/g, " ")}
                   </div>
 
