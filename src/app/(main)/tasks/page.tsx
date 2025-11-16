@@ -171,7 +171,12 @@ export default function TasksPage() {
         </div>
 
         <main className="flex flex-1 flex-col">
-          {tasks && <TasksCarousel tasks={filteredTasks ?? []} />}
+          {tasks && (
+            <TasksCarousel
+              tasks={filteredTasks ?? []}
+              onTaskStatusUpdated={fetchTasks}
+            />
+          )}
         </main>
       </div>
     </main>

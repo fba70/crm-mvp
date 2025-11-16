@@ -162,18 +162,11 @@ function ClientCards({
   clients: Client[]
   onClientUpdated: () => void
 }) {
-  const CARDS_PER_PAGE = 2
-  const [page, setPage] = useState(1)
-  const totalPages = Math.ceil(clients.length / CARDS_PER_PAGE)
-  const startIdx = (page - 1) * CARDS_PER_PAGE
-  const endIdx = startIdx + CARDS_PER_PAGE
-  const pageClients = clients.slice(startIdx, endIdx)
-
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="grid w-[90%] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-        {pageClients.map((client) => (
-          <Card key={client.id} className="pt-4 pb-6">
+    <div className="flex flex-col items-center justify-center">
+      <div className="grid h-[580px] w-[95%] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+        {clients.map((client) => (
+          <Card key={client.id} className="w-[95%] pt-4 pb-6">
             <CardContent className="flex flex-col gap-3 px-6 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="text-lg font-semibold">{client.name}</div>
@@ -204,7 +197,6 @@ function ClientCards({
               <div className="flex flex-row gap-6">
                 {client.email && (
                   <div className="flex flex-row items-center gap-3 text-sm">
-                    {" "}
                     <AtSign size={18} /> {client.email}
                   </div>
                 )}
@@ -223,10 +215,10 @@ function ClientCards({
                         className="flex flex-row justify-between text-sm"
                       >
                         <span className="font-medium">{contact.name}</span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 dark:text-gray-300">
                           {contact.position || "No position"}
                         </span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-500 dark:text-gray-300">
                           {contact.email || "No email"}
                         </span>
                       </div>
@@ -242,28 +234,6 @@ function ClientCards({
           </Card>
         ))}
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            className="bg-muted text-foreground rounded px-3 py-1 disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Prev
-          </button>
-          <span className="text-sm">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            className="bg-muted text-foreground rounded px-3 py-1 disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -277,18 +247,11 @@ function ContactCards({
   clients: Client[]
   onContactUpdated: () => void
 }) {
-  const CARDS_PER_PAGE = 3
-  const [page, setPage] = useState(1)
-  const totalPages = Math.ceil(contacts.length / CARDS_PER_PAGE)
-  const startIdx = (page - 1) * CARDS_PER_PAGE
-  const endIdx = startIdx + CARDS_PER_PAGE
-  const pageContacts = contacts.slice(startIdx, endIdx)
-
   return (
-    <div className="flex flex-col items-center justify-center gap-6">
-      <div className="grid w-[90%] grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
-        {pageContacts.map((contact) => (
-          <Card key={contact.id} className="pt-4 pb-4">
+    <div className="flex flex-col items-center justify-center">
+      <div className="grid h-[580px] w-[95%] grid-cols-1 gap-2 overflow-y-auto sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-4">
+        {contacts.map((contact) => (
+          <Card key={contact.id} className="h-auto pt-4 pb-4">
             <CardContent className="flex flex-col gap-3 px-6 py-0">
               <div className="flex flex-row items-center justify-between gap-2">
                 <div className="text-lg font-semibold">{contact.name}</div>
@@ -307,7 +270,6 @@ function ContactCards({
               <div className="flex flex-row gap-6">
                 {contact.email && (
                   <div className="flex flex-row items-center gap-3 text-sm">
-                    {" "}
                     <AtSign size={18} /> {contact.email}
                   </div>
                 )}
@@ -333,28 +295,6 @@ function ContactCards({
           </Card>
         ))}
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-2">
-          <button
-            className="bg-muted text-foreground rounded px-3 py-1 disabled:opacity-50"
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
-            disabled={page === 1}
-          >
-            Prev
-          </button>
-          <span className="text-sm">
-            Page {page} of {totalPages}
-          </span>
-          <button
-            className="bg-muted text-foreground rounded px-3 py-1 disabled:opacity-50"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
-          >
-            Next
-          </button>
-        </div>
-      )}
     </div>
   )
 }

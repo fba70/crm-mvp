@@ -24,6 +24,7 @@ import { NotificationType, type Task } from "@/types/entities"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 import { Textarea } from "@/components/ui/textarea"
+import { useNotificationContext } from "@/context/notification-context"
 
 type TaskStatusUpdateFields = {
   transferStatus?: "UNDEFINED" | "ACCEPTED" | "REJECTED"
@@ -46,6 +47,8 @@ export default function FormTaskTransferManageDialog({
       transferStatus: "ACCEPTED",
     },
   })
+
+  const { triggerNotificationUpdate } = useNotificationContext()
 
   const [isOpen, setIsOpen] = useState(false) // State to control dialog visibility
 
@@ -97,6 +100,7 @@ export default function FormTaskTransferManageDialog({
         try {
           await axiosApi.post("/api/notification", notificationPayload)
           toast.success("Task transfer status updated, and notification sent")
+          triggerNotificationUpdate()
         } catch (notificationError) {
           console.error("Failed to create notification:", notificationError)
           toast.error("Task transfer status updated, but notification failed")

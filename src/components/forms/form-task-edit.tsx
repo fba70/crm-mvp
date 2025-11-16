@@ -96,11 +96,17 @@ export default function FormTaskEditDialog({
     )
 
     if (selectedContact?.clientId) {
-      setValue("clientId", selectedContact.clientId) // Autofill clientId
+      // Only update if the clientId is different
+      if (form.getValues("clientId") !== selectedContact.clientId) {
+        setValue("clientId", selectedContact.clientId) // Autofill clientId
+      }
     } else {
-      setValue("clientId", "") // Clear clientId if no client reference
+      // Fallback to task.clientId if no client reference
+      if (form.getValues("clientId") !== (task.clientId || undefined)) {
+        setValue("clientId", task.clientId || undefined)
+      }
     }
-  }, [selectedContactId, contacts, setValue])
+  }, [selectedContactId, contacts, setValue, task.clientId, form])
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -111,9 +117,13 @@ export default function FormTaskEditDialog({
     startTransition(async () => {
       const payload = {
         ...data,
-        clientId: data.clientId === "No client" ? null : data.clientId, // Convert empty value to null
-        contactId: data.contactId === "No contact" ? null : data.contactId, // Convert empty value to null
+        clientId: data.clientId === "No client" ? null : data.clientId, // Convert "No client" to null
+        contactId:
+          data.contactId === "No contact" || !data.contactId
+            ? null
+            : data.contactId, // Convert "No contact" to null
       }
+
       if (payload.date) {
         payload.date = new Date(payload.date).toISOString()
       }
@@ -182,7 +192,7 @@ export default function FormTaskEditDialog({
                       Status Change Reason
                     </FormLabel>
                     <FormControl>
-                      <Input type="url" {...field} />
+                      <Input type="text" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

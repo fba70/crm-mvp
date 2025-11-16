@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import FormTaskTransferManageDialog from "@/components/forms/form-task-transfer-manage"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type User = {
   id: string
@@ -30,6 +31,8 @@ export default function TaskTransitionsPage() {
 
   const [users, setUsers] = useState<User[]>([])
   const [loadingUsers, setLoadingUsers] = useState(true)
+
+  const [showClosedTasks, setShowClosedTasks] = useState(false)
 
   useEffect(() => {
     const fetchUsers = async () => {
@@ -67,12 +70,18 @@ export default function TaskTransitionsPage() {
   }
 
   const tasksToMe =
-    tasks?.filter((task) => task.transferToId === user?.user.id) || []
+    tasks?.filter(
+      (task) =>
+        task.transferToId === user?.user.id &&
+        (showClosedTasks || task.status !== "CLOSED"), // Filter out closed tasks if checkbox is unchecked
+    ) || []
   const tasksFromMe =
     tasks?.filter(
-      (task) => task.assignedToId === user?.user.id && task.transferToId,
+      (task) =>
+        task.assignedToId === user?.user.id &&
+        task.transferToId &&
+        (showClosedTasks || task.status !== "CLOSED"), // Filter out closed tasks if checkbox is unchecked
     ) || []
-  // && task.transferToId !== user?.user.id
 
   const ITEMS_PER_PAGE = 3
   const totalPages1 = Math.ceil(tasksToMe.length / ITEMS_PER_PAGE)
@@ -97,6 +106,19 @@ export default function TaskTransitionsPage() {
       <div className="space-y-6">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Tasks Transitions</h1>
+          <div className="flex items-center gap-2">
+            <Checkbox
+              id="show-closed-tasks"
+              checked={showClosedTasks}
+              onCheckedChange={(checked) => setShowClosedTasks(!!checked)}
+            />
+            <label
+              htmlFor="show-closed-tasks"
+              className="text-sm text-gray-600 dark:text-gray-300"
+            >
+              Show Closed Tasks
+            </label>
+          </div>
         </div>
 
         <Tabs

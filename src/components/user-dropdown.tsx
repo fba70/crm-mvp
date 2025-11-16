@@ -49,11 +49,8 @@ export function UserDropdown({ user }: UserDropdownProps) {
             <UserIcon className="size-4" /> <span>Profile</span>
           </Link>
         </DropdownMenuItem>
-        <DropdownMenuItem asChild>
-          <div className="mx-9 flex items-center gap-2 py-0">
-            <ModeToggle />
-          </div>
-        </DropdownMenuItem>
+
+        <ModeToggle />
 
         {user.role === "admin" && <AdminItem />}
         <SignOutItem />

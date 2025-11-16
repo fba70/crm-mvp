@@ -174,7 +174,7 @@ export default function FeedItemPage() {
           return (
             <div key={index}>
               <p className="font-semibold">{title}</p>
-              <p className="text-gray-700">{text}</p>
+              <p className="text-gray-700 dark:text-gray-300">{text}</p>
             </div>
           )
         })}
@@ -206,7 +206,7 @@ export default function FeedItemPage() {
           return (
             <div key={index}>
               <p className="font-semibold">{title}</p>
-              <p className="text-gray-700">{text}</p>
+              <p className="text-gray-700 dark:text-gray-300">{text}</p>
             </div>
           )
         })}
@@ -334,7 +334,9 @@ export default function FeedItemPage() {
                     </DialogContent>
                   </Dialog>
                   <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
-                    {feedItem.feedback || "No message"}
+                    {parseFeedback(
+                      feedItem.feedback || "No feedback available",
+                    )}
                   </span>
                 </div>
               </div>
@@ -362,7 +364,9 @@ export default function FeedItemPage() {
                     </DialogContent>
                   </Dialog>
                   <span className="block max-h-30 w-[290px] overflow-y-auto text-sm">
-                    {feedItem.feedbackBooking || "No message"}
+                    {parseFeedbackBooking(
+                      feedItem.feedbackBooking || "No feedback available",
+                    )}
                   </span>
                 </div>
               </div>
@@ -456,7 +460,7 @@ export default function FeedItemPage() {
           feedItem.type === "INDUSTRY_INFO") && (
           <Card className="mx-auto mt-4 flex w-[95%] flex-col py-4">
             <CardContent className="flex flex-col gap-2 px-5 py-0">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-500 dark:text-gray-300">
                 You can ask AI-assistant to provide inputs and recommendations
                 within the context of the client activity event. Please specify
                 your request to AI-assistant here:

@@ -15,8 +15,11 @@ import { Button } from "@/components/ui/button"
 import { Check, Mails } from "lucide-react"
 import type { Notification } from "@/types/entities"
 import { toast } from "sonner"
+import { useNotificationContext } from "@/context/notification-context"
 
 export default function NewsDrawer({ userId }: { userId: string }) {
+  const { notificationsUpdated } = useNotificationContext()
+
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -39,7 +42,7 @@ export default function NewsDrawer({ userId }: { userId: string }) {
 
   useEffect(() => {
     fetchNotifications()
-  }, [])
+  }, [notificationsUpdated])
 
   const handleStatusChange = async (id: string) => {
     try {
@@ -122,7 +125,7 @@ export default function NewsDrawer({ userId }: { userId: string }) {
         </div>
         <DrawerFooter>
           <DrawerClose asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline">Close</Button>
           </DrawerClose>
         </DrawerFooter>
       </DrawerContent>

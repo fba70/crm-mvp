@@ -24,7 +24,13 @@ import {
 } from "@/components/ui/dialog"
 import Link from "next/link"
 
-export function TasksCarousel({ tasks }: { tasks: Task[] }) {
+export function TasksCarousel({
+  tasks,
+  onTaskStatusUpdated,
+}: {
+  tasks: Task[]
+  onTaskStatusUpdated: () => void // Callback to notify parent of task status update
+}) {
   const router = useRouter()
 
   const [currentIndex, setCurrentIndex] = useState(2)
@@ -135,7 +141,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
   // Gradient: bg-gradient-to-t from-white to-gray-200
 
   return (
-    <div className="relative h-[68vh] w-full overflow-hidden">
+    <div className="relative h-[67vh] w-full overflow-hidden">
       {/* Carousel Container */}
       <div className="relative flex h-full w-full items-center justify-center">
         {currentIndex >= 0 && currentIndex < tasks.length && (
@@ -160,13 +166,13 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
             onClick={() => !isScrolling && setCurrentIndex(index)}
           >
             <div
-              className={`flex h-full w-full flex-col items-center justify-center rounded-full p-6 shadow-lg ${getTaskBgColor(card.date)} border-3 ${
+              className={`flex h-full w-full flex-col items-center justify-center rounded-full p-6 shadow-lg ${getTaskBgColor(card.date)} border-4 ${
                 card.transferToId
                   ? card.transferStatus === "ACCEPTED"
                     ? "border-green-600"
                     : card.transferStatus === "REJECTED"
                       ? "border-red-600"
-                      : "border-dashed border-orange-500"
+                      : "border-dashed border-blue-500"
                   : "border-white"
               }`}
             >
@@ -191,7 +197,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         {tasks[currentIndex] && (
           <Button
             variant="default"
-            className="fixed right-35 bottom-40 z-30 rounded-lg"
+            className="fixed top-80 right-38 z-30 rounded-lg"
             onClick={() => {
               router.push(`/tasks/${tasks[currentIndex].id}`)
             }}
@@ -205,7 +211,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         {currentIndex >= 0 && currentIndex < tasks.length && (
           <>
             <button
-              className="absolute top-3/4 left-2 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-lime-600 text-xl text-white shadow-lg"
+              className="absolute top-3/4 left-4 z-30 flex h-16 w-16 items-center justify-center rounded-full bg-lime-600 text-xl text-white shadow-lg"
               onClick={() => {
                 setIsDialogOpen(true)
                 console.log("Linked tasks button clicked")
@@ -214,44 +220,57 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
               {tasks[currentIndex].linkedTasks?.length || 0}
             </button>
 
-            <a
-              href={`mailto:${tasks[currentIndex]?.client?.email ?? ""}`}
-              onClick={(e) => {
-                if (!tasks[currentIndex]?.client?.email) e.preventDefault()
-              }}
-            >
+            <div className="absolute top-1/10 right-4 z-15 flex flex-col items-center justify-center gap-2">
+              <a
+                href={`mailto:${tasks[currentIndex]?.client?.email ?? ""}`}
+                onClick={(e) => {
+                  if (!tasks[currentIndex]?.client?.email) e.preventDefault()
+                }}
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110 dark:border-gray-500"
+                >
+                  <Mail className="h-8 w-8" />
+                </Button>
+              </a>
+
+              <a
+                href={`tel:${tasks[currentIndex]?.client?.phone ?? ""}`}
+                onClick={(e) => {
+                  if (!tasks[currentIndex]?.client?.phone) e.preventDefault()
+                }}
+              >
+                <Button
+                  size="lg"
+                  variant="outline"
+                  className="h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110 dark:border-gray-500"
+                >
+                  <Phone className="h-8 w-8" />
+                </Button>
+              </a>
+            </div>
+
+            <div className="absolute top-1/10 left-4 z-15 flex flex-col items-center justify-center gap-2">
               <Button
                 size="lg"
                 variant="outline"
-                className="absolute top-1/2 left-2 z-15 h-16 w-16 -translate-y-1/2 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+                className="h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110 dark:border-gray-500"
+                onClick={() => setStatusDialogOpen1(true)}
               >
-                <Mail className="h-8 w-8" />
+                <Check className="h-8 w-8 font-bold text-green-600" />
               </Button>
-            </a>
 
-            <a
-              href={`tel:${tasks[currentIndex]?.client?.phone ?? ""}`}
-              onClick={(e) => {
-                if (!tasks[currentIndex]?.client?.phone) e.preventDefault()
-              }}
-            >
               <Button
                 size="lg"
                 variant="outline"
-                className="absolute bottom-1/3 left-2 z-15 h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
+                className="h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110 dark:border-gray-500"
+                onClick={() => setStatusDialogOpen2(true)}
               >
-                <Phone className="h-8 w-8" />
+                <X className="h-8 w-8 text-red-600" />
               </Button>
-            </a>
-
-            <Button
-              size="lg"
-              variant="outline"
-              className="absolute top-1/2 right-2 z-15 h-16 w-16 -translate-y-1/2 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
-              onClick={() => setStatusDialogOpen1(true)}
-            >
-              <Check className="h-8 w-8 font-bold text-green-600" />
-            </Button>
+            </div>
 
             {statusDialogOpen1 && (
               <div className="z-200">
@@ -260,19 +279,13 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
                   onOpenChange={setStatusDialogOpen1}
                   task={tasks[currentIndex]}
                   status="CLOSED"
-                  onSuccess={() => setStatusDialogOpen1(false)}
+                  onSuccess={() => {
+                    setStatusDialogOpen1(false)
+                    onTaskStatusUpdated() // Notify parent of successful status update
+                  }}
                 />
               </div>
             )}
-
-            <Button
-              size="lg"
-              variant="outline"
-              className="absolute right-2 bottom-1/3 z-15 h-16 w-16 rounded-full border-2 bg-white/90 backdrop-blur-sm transition-transform hover:scale-110"
-              onClick={() => setStatusDialogOpen2(true)}
-            >
-              <X className="h-8 w-8 text-red-600" />
-            </Button>
 
             {statusDialogOpen2 && (
               <FormTaskStatusChangeDialog
@@ -280,7 +293,10 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
                 onOpenChange={setStatusDialogOpen2}
                 task={tasks[currentIndex]}
                 status="DELETED"
-                onSuccess={() => setStatusDialogOpen2(false)}
+                onSuccess={() => {
+                  setStatusDialogOpen2(false)
+                  onTaskStatusUpdated() // Notify parent of successful status update
+                }}
               />
             )}
           </>
@@ -293,29 +309,33 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
               <DialogTitle>Linked Tasks:</DialogTitle>
             </DialogHeader>
             <div className="space-y-4">
-              {tasks[currentIndex].linkedTasks?.map((linkedTask) => (
-                <div
-                  key={linkedTask.id}
-                  className="flex flex-col gap-2 border-b pb-1"
-                >
-                  <p className="text-sm font-medium">
-                    Name: {linkedTask.theme}
-                  </p>
-                  <div className="flex flex-row items-center justify-between gap-4">
-                    <p className="text-sm">Type: {linkedTask.type}</p>
-                    <p className="text-sm">Priority: {linkedTask.priority}</p>
-                    <p className="text-sm">Status: {linkedTask.status}</p>
-                    <Link
-                      href={`/tasks/${linkedTask.id}`}
-                      className="flex items-center gap-1 text-blue-500 hover:underline"
-                    >
-                      <SquareArrowOutUpRight size={16} />
-                    </Link>
+              {Array.isArray(tasks[currentIndex]?.linkedTasks) ? (
+                tasks[currentIndex].linkedTasks.map((linkedTask) => (
+                  <div
+                    key={linkedTask.id}
+                    className="flex flex-col gap-2 border-b pb-1"
+                  >
+                    <p className="text-sm font-medium">
+                      Name: {linkedTask.theme}
+                    </p>
+                    <div className="flex flex-row items-center justify-between gap-4">
+                      <p className="text-sm">Type: {linkedTask.type}</p>
+                      <p className="text-sm">Priority: {linkedTask.priority}</p>
+                      <p className="text-sm">Status: {linkedTask.status}</p>
+                      <Link
+                        href={`/tasks/${linkedTask.id}`}
+                        className="flex items-center gap-1 text-blue-500 hover:underline"
+                      >
+                        <SquareArrowOutUpRight size={16} />
+                      </Link>
+                    </div>
                   </div>
-
-                  {/* Add more parameters as needed */}
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">
+                  No linked tasks available.
+                </p>
+              )}
             </div>
           </DialogContent>
         </Dialog>
@@ -324,7 +344,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         <Button
           variant="ghost"
           size="lg"
-          className="absolute bottom-4 left-1/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full bg-white/80 backdrop-blur-sm"
+          className="absolute bottom-4 left-1/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full border-1 border-gray-300 bg-white/80 backdrop-blur-sm dark:bg-gray-500"
           onClick={() => handleScroll("down")}
           disabled={currentIndex >= tasks.length - 1}
         >
@@ -334,7 +354,7 @@ export function TasksCarousel({ tasks }: { tasks: Task[] }) {
         <Button
           variant="ghost"
           size="lg"
-          className="absolute bottom-4 left-2/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full bg-white/80 backdrop-blur-sm"
+          className="absolute bottom-4 left-2/3 z-20 h-12 w-12 -translate-x-1/2 animate-bounce rounded-full border-1 border-gray-300 bg-white/80 backdrop-blur-sm dark:bg-gray-500"
           onClick={() => handleScroll("up")}
           disabled={currentIndex >= 0 && currentIndex <= 0}
         >

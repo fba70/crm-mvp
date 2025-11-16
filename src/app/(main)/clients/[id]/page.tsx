@@ -62,28 +62,34 @@ export default function ClientItemPage() {
           <CardContent className="flex flex-col gap-4 px-5 py-0">
             <div className="mb-2 grid grid-cols-[120px_auto] gap-4">
               <div className="text-gray-400">Name:</div>
-              <div className="text-xl text-black">{client?.name}</div>
+              <div className="text-xl text-black dark:text-gray-300">
+                {client?.name}
+              </div>
 
               <div className="text-gray-400">Email:</div>
-              <div className="text-xl text-black">{client?.email || "N/A"}</div>
+              <div className="text-xl text-black dark:text-gray-300">
+                {client?.email || "N/A"}
+              </div>
 
               <div className="text-gray-400">Phone:</div>
-              <div className="text-xl text-black">{client?.phone || "N/A"}</div>
+              <div className="text-xl text-black dark:text-gray-300">
+                {client?.phone || "N/A"}
+              </div>
 
               <div className="text-gray-400">Address:</div>
-              <div className="text-xl text-black">
+              <div className="text-xl text-black dark:text-gray-300">
                 {client?.address || "N/A"}
               </div>
 
               <div className="text-gray-400">Creation Date:</div>
-              <div className="text-xl text-black">
+              <div className="text-xl text-black dark:text-gray-300">
                 {client?.createdAt
                   ? new Date(client.createdAt).toLocaleDateString()
                   : "N/A"}
               </div>
 
               <div className="text-gray-400">Contacts:</div>
-              <div className="text-xl text-black">
+              <div className="text-xl text-black dark:text-gray-300">
                 {client?.contacts && client?.contacts?.length > 0
                   ? client.contacts.map((contact) => (
                       <div
@@ -92,10 +98,10 @@ export default function ClientItemPage() {
                       >
                         <div className="flex flex-col">
                           <span className="font-medium">{contact.name}</span>
-                          <span className="text-gray-500">
+                          <span className="text-gray-500 dark:text-gray-300">
                             {contact.position || "No position"}
                           </span>
-                          <span className="text-gray-500">
+                          <span className="text-gray-500 dark:text-gray-300">
                             {contact.email || "No email"}
                           </span>
                         </div>

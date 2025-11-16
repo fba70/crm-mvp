@@ -92,14 +92,29 @@ export default function TaskPage() {
     notFound()
   }
 
-  // console.log("TASK", task)
+  console.log("TASK", task)
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
       <div className="flex justify-between">
         <div className="flex w-[95%] flex-row items-center justify-between gap-2">
           <h1 className="ml-6 text-2xl font-semibold">Task</h1>
-          <RouteButton pathParam="/tasks" nameParam="Go back to tasks list" />
+          <div className="flex flex-row gap-2">
+            <RouteButton pathParam="/tasks" nameParam="Back to all tasks" />
+
+            {task.parentTaskId && (
+              <Button
+                variant="default"
+                onClick={() => {
+                  if (task.parentTaskId) {
+                    router.push(`/tasks/${task.parentTaskId}`)
+                  }
+                }}
+              >
+                Back to parent task
+              </Button>
+            )}
+          </div>
         </div>
       </div>
       <div className="space-y-6">
@@ -273,13 +288,13 @@ export default function TaskPage() {
               {task.parentTaskId && (
                 <>
                   <div className="pr-2 text-sm text-gray-500">Parent task:</div>
-                  <div className="flex items-center justify-center gap-2 text-lg">
+                  <div className="flex items-center justify-start gap-2 text-lg">
                     {task.parentTask?.theme}{" "}
                     <Button
                       variant="outline"
                       onClick={() => {
-                        if (task.parentTask?.id) {
-                          router.push(`/tasks/${task.parentTask.id}`)
+                        if (task.parentTaskId) {
+                          router.push(`/tasks/${task.parentTaskId}`)
                         }
                       }}
                     >
