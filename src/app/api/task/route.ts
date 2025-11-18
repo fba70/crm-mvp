@@ -24,6 +24,7 @@ export async function GET(req: NextRequest) {
         { createdById: urlUserId },
         { assignedToId: urlUserId },
         { transferToId: urlUserId },
+        { collaborators: { some: { id: urlUserId } } },
       ],
     },
     include: {
@@ -33,6 +34,7 @@ export async function GET(req: NextRequest) {
       assignedTo: true,
       linkedTasks: true,
       transferTo: true,
+      collaborators: true,
     },
     orderBy: { createdAt: "desc" },
   })

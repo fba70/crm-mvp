@@ -26,6 +26,7 @@ model User {
   createdClients  Client[]  @relation("CreatedClients")
   transferredTasks Task[]   @relation("TransferredTasks")
   createdContacts Contact[] @relation("CreatedContacts")
+  collaboratedTasks Task[]  @relation("TaskCollaborators")
 
   likes       Like[]
 
@@ -131,6 +132,9 @@ model Task {
   createdBy       User     @relation("CreatedTasks", fields: [createdById], references: [id])
   assignedToId    String?
   assignedTo      User?    @relation("AssignedTasks", fields: [assignedToId], references: [id])
+
+  // Collaborating users
+  collaborators   User[]   @relation("TaskCollaborators")
 
   // Linked tasks
   parentTaskId    String?   

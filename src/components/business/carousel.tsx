@@ -11,6 +11,7 @@ import {
   X,
   Eye,
   SquareArrowOutUpRight,
+  Users,
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import type { Task } from "@/types/entities"
@@ -196,7 +197,7 @@ export function TasksCarousel({
                 {card.type}
               </h3>
               {card.client?.name && (
-                <h4 className="mb-4 max-w-[180px] truncate text-2xl text-gray-600">
+                <h4 className="mb-2 max-w-[180px] truncate text-2xl text-gray-600">
                   {card.client.name}
                 </h4>
               )}
@@ -204,6 +205,9 @@ export function TasksCarousel({
                 <p className="text-lg font-medium text-gray-500">
                   {format(new Date(card.date), "dd.MM.yyyy")}
                 </p>
+              )}
+              {card.collaborators && card.collaborators.length > 0 && (
+                <Users className="mt-1 h-5 w-5 text-gray-500" />
               )}
             </div>
           </div>

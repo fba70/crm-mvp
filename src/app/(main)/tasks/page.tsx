@@ -95,6 +95,8 @@ export default function TasksPage() {
     fetchContacts()
   }, [])
 
+  console.log("TASKS data", tasks)
+
   // Save filters to sessionStorage whenever they change
   useEffect(() => {
     const currentTypeFilter = sessionStorage.getItem("typeFilter")

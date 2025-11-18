@@ -16,6 +16,7 @@ export async function GET(
         createdBy: true,
         assignedTo: true,
         linkedTasks: true,
+        collaborators: true,
       },
     })
     if (!task) {

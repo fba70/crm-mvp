@@ -33,6 +33,7 @@ export type Task = {
   rejectionReason?: string | null
   createdById: string
   assignedToId?: string | null
+  collaborators?: User[] | null
   createdAt: string | Date
   updatedAt: string | Date
   contactId?: string | null

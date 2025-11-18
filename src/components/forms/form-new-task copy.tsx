@@ -27,11 +27,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Task, Client, Contact } from "@/types/entities"
-import { User } from "@/generated/prisma/wasm"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
 import { DialogDescription } from "@radix-ui/react-dialog"
-import { Checkbox } from "@/components/ui/checkbox"
 
 type TaskEditFormFields = {
   theme?: string
@@ -47,7 +45,6 @@ type TaskEditFormFields = {
   clientId?: string
   contactId?: string
   parentTaskId?: string
-  collaborators?: string[]
 }
 
 export default function FormNewTaskDialog({
@@ -80,27 +77,8 @@ export default function FormNewTaskDialog({
       clientId: "",
       contactId: "",
       parentTaskId: parentTaskId || undefined,
-      collaborators: [],
     },
   })
-
-  const [users, setUsers] = useState<User[]>([])
-  const [usersLoading, setUsersLoading] = useState(false)
-
-  useEffect(() => {
-    const fetchUsers = async () => {
-      setUsersLoading(true)
-      try {
-        const res = await axiosApi.get("/api/user")
-        setUsers(res.data)
-      } catch (error) {
-        console.error("Failed to fetch users:", error)
-      } finally {
-        setUsersLoading(false)
-      }
-    }
-    fetchUsers()
-  }, [])
 
   const { control, setValue } = form
 
@@ -110,44 +88,18 @@ export default function FormNewTaskDialog({
     name: "contactId",
   })
 
-  // Watch for changes to the clientId field
-  const selectedClientId = useWatch({
-    control,
-    name: "clientId",
-  })
-
+  // Autofill clientId based on the selected contactId
   useEffect(() => {
     const selectedContact = contacts.find(
       (contact) => contact.id === selectedContactId,
     )
 
-    // If contact has a clientId and it's different from current, autofill it
-    if (
-      selectedContact?.clientId &&
-      form.getValues("clientId") !== selectedContact.clientId
-    ) {
-      setValue("clientId", selectedContact.clientId)
+    if (selectedContact?.clientId) {
+      setValue("clientId", selectedContact.clientId) // Autofill clientId
+    } else {
+      setValue("clientId", "") // Clear clientId if no client reference
     }
-    // If no contact selected, do nothing (leave clientId as is)
   }, [selectedContactId, contacts, setValue])
-
-  useEffect(() => {
-    const associatedContacts = contacts.filter(
-      (contact) => contact.clientId === selectedClientId,
-    )
-
-    // If client has contacts and it's different from current, autofill the first one
-    if (
-      associatedContacts.length > 0 &&
-      form.getValues("contactId") !== associatedContacts[0].id
-    ) {
-      setValue("contactId", associatedContacts[0].id)
-    } else if (associatedContacts.length === 0 && form.getValues("contactId")) {
-      // If no contacts, clear contactId
-      setValue("contactId", "")
-    }
-    // If no client selected, do nothing (leave contactId as is)
-  }, [selectedClientId, contacts, setValue])
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -165,9 +117,6 @@ export default function FormNewTaskDialog({
         parentTaskId: parentTaskId || undefined,
         clientId: data.clientId === "No client" ? null : data.clientId, // Convert empty value to null
         contactId: data.contactId === "No contact" ? null : data.contactId, // Convert empty value to null
-        collaborators: {
-          connect: data.collaborators?.map((id) => ({ id })) || [], // Connect collaborators by ID
-        },
       }
 
       if (payload.date) {
@@ -360,54 +309,6 @@ export default function FormNewTaskDialog({
                 )}
               />
             </div>
-
-            <FormField
-              control={form.control}
-              name="collaborators"
-              render={() => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">
-                    Collaborators (Optional)
-                  </FormLabel>
-                  <div className="max-h-16 space-y-2 overflow-y-auto">
-                    {usersLoading ? (
-                      <p className="text-sm text-gray-500">Loading users...</p>
-                    ) : (
-                      users.map((user) => (
-                        <FormField
-                          key={user.id}
-                          control={form.control}
-                          name="collaborators"
-                          render={({ field }) => (
-                            <FormItem className="flex items-center space-x-2">
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(user.id)}
-                                  onCheckedChange={(checked) => {
-                                    const current = field.value || []
-                                    if (checked) {
-                                      field.onChange([...current, user.id])
-                                    } else {
-                                      field.onChange(
-                                        current.filter((id) => id !== user.id),
-                                      )
-                                    }
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="text-sm font-normal">
-                                {user.name}
-                              </FormLabel>
-                            </FormItem>
-                          )}
-                        />
-                      ))
-                    )}
-                  </div>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}

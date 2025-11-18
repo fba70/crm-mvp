@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition, useRef } from "react" // Add useRef
+import { useEffect, useState, useTransition } from "react" // Add useRef
 import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -27,8 +27,10 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import type { Task, Client, Contact } from "@/types/entities"
+import { User } from "@/generated/prisma/wasm"
 import axiosApi from "@/lib/axios"
 import { toast } from "sonner"
+import { Checkbox } from "@/components/ui/checkbox"
 
 type TaskEditFormFields = {
   theme?: string
@@ -44,6 +46,7 @@ type TaskEditFormFields = {
   statusChangeReason?: string
   clientId?: string
   contactId?: string
+  collaborators?: string[]
 }
 
 export default function FormTaskEditDialog({
@@ -78,8 +81,28 @@ export default function FormTaskEditDialog({
       statusChangeReason: task.statusChangeReason || "",
       clientId: task.clientId || "",
       contactId: task.contactId || "",
+      collaborators:
+        task.collaborators?.map((collaborator) => collaborator.id) || [],
     },
   })
+
+  const [users, setUsers] = useState<User[]>([])
+  const [usersLoading, setUsersLoading] = useState(false)
+
+  useEffect(() => {
+    const fetchUsers = async () => {
+      setUsersLoading(true)
+      try {
+        const res = await axiosApi.get("/api/user")
+        setUsers(res.data)
+      } catch (error) {
+        console.error("Failed to fetch users:", error)
+      } finally {
+        setUsersLoading(false)
+      }
+    }
+    fetchUsers()
+  }, [])
 
   const { control, setValue } = form
 
@@ -95,58 +118,37 @@ export default function FormTaskEditDialog({
     name: "clientId",
   })
 
-  // Refs to track if autofill has already occurred for the current selections
-  const hasAutofilledClient = useRef(false)
-  const hasAutofilledContact = useRef(false)
-
   useEffect(() => {
-    // console.log("useEffect for selectedContactId triggered:", selectedContactId) // Debug log
-
     const selectedContact = contacts.find(
       (contact) => contact.id === selectedContactId,
     )
 
-    if (selectedContact?.clientId && !hasAutofilledClient.current) {
-      // Only update if the clientId is different
-      if (form.getValues("clientId") !== selectedContact.clientId) {
-        setValue("clientId", selectedContact.clientId) // Autofill clientId
-        hasAutofilledClient.current = true // Mark as autofilled
-      }
-    } else if (!selectedContactId) {
-      // Reset autofill flag if no contact is selected
-      hasAutofilledClient.current = false
-      // Fallback to task.clientId if no client reference
-      if (form.getValues("clientId") !== (task.clientId || undefined)) {
-        setValue("clientId", task.clientId || undefined)
-      }
+    // If contact has a clientId and it's different from current, autofill it
+    if (
+      selectedContact?.clientId &&
+      form.getValues("clientId") !== selectedContact.clientId
+    ) {
+      setValue("clientId", selectedContact.clientId)
     }
-  }, [selectedContactId, contacts, setValue, task.clientId])
+    // If no contact selected, do nothing (leave clientId as is)
+  }, [selectedContactId, contacts, setValue])
 
   useEffect(() => {
-    // console.log("useEffect for selectedClientId triggered:", selectedClientId) // Debug log
+    const associatedContacts = contacts.filter(
+      (contact) => contact.clientId === selectedClientId,
+    )
 
-    if (selectedClientId && !hasAutofilledContact.current) {
-      const associatedContacts = contacts.filter(
-        (contact) => contact.clientId === selectedClientId,
-      )
-
-      if (associatedContacts.length > 0) {
-        // Set the contactId to the first associated contact's ID
-        if (form.getValues("contactId") !== associatedContacts[0].id) {
-          setValue("contactId", associatedContacts[0].id)
-          hasAutofilledContact.current = true // Mark as autofilled
-        }
-      } else {
-        // Clear the contactId if no associated contacts
-        if (form.getValues("contactId")) {
-          setValue("contactId", "")
-        }
-        hasAutofilledContact.current = false // Reset flag
-      }
-    } else if (!selectedClientId) {
-      // Reset autofill flag if no client is selected
-      hasAutofilledContact.current = false
+    // If client has contacts and it's different from current, autofill the first one
+    if (
+      associatedContacts.length > 0 &&
+      form.getValues("contactId") !== associatedContacts[0].id
+    ) {
+      setValue("contactId", associatedContacts[0].id)
+    } else if (associatedContacts.length === 0 && form.getValues("contactId")) {
+      // If no contacts, clear contactId
+      setValue("contactId", "")
     }
+    // If no client selected, do nothing (leave contactId as is)
   }, [selectedClientId, contacts, setValue])
 
   const [isPending, startTransition] = useTransition()
@@ -163,6 +165,9 @@ export default function FormTaskEditDialog({
           data.contactId === "No contact" || !data.contactId
             ? null
             : data.contactId, // Convert "No contact" to null
+        collaborators: {
+          set: data.collaborators?.map((id) => ({ id })) || [], // Added: Set collaborators by ID
+        },
       }
 
       if (payload.date) {
@@ -175,8 +180,6 @@ export default function FormTaskEditDialog({
         toast.success("Task updated successfully")
         setOpen(false)
         // Reset autofill flags on successful submit
-        hasAutofilledClient.current = false
-        hasAutofilledContact.current = false
       } catch (err) {
         console.log("Task update error", err)
         setError("Failed to update task")
@@ -324,10 +327,7 @@ export default function FormTaskEditDialog({
                     <FormLabel className="text-gray-500">Client</FormLabel>
                     <FormControl>
                       <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          hasAutofilledContact.current = false // Reset on manual change
-                        }}
+                        onValueChange={field.onChange} // Simplified: No ref reset needed
                         value={field.value || ""}
                       >
                         <SelectTrigger>
@@ -347,6 +347,7 @@ export default function FormTaskEditDialog({
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="contactId"
@@ -355,10 +356,7 @@ export default function FormTaskEditDialog({
                     <FormLabel className="text-gray-500">Contact</FormLabel>
                     <FormControl>
                       <Select
-                        onValueChange={(value) => {
-                          field.onChange(value)
-                          hasAutofilledClient.current = false // Reset on manual change
-                        }}
+                        onValueChange={field.onChange} // Simplified: No ref reset needed
                         value={field.value || ""}
                       >
                         <SelectTrigger>
@@ -379,6 +377,54 @@ export default function FormTaskEditDialog({
                 )}
               />
             </div>
+
+            <FormField
+              control={form.control}
+              name="collaborators"
+              render={() => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">
+                    Collaborators (Optional)
+                  </FormLabel>
+                  <div className="max-h-16 space-y-2 overflow-y-auto">
+                    {usersLoading ? (
+                      <p className="text-sm text-gray-500">Loading users...</p>
+                    ) : (
+                      users.map((user) => (
+                        <FormField
+                          key={user.id}
+                          control={form.control}
+                          name="collaborators"
+                          render={({ field }) => (
+                            <FormItem className="flex items-center space-x-2">
+                              <FormControl>
+                                <Checkbox
+                                  checked={field.value?.includes(user.id)}
+                                  onCheckedChange={(checked) => {
+                                    const current = field.value || []
+                                    if (checked) {
+                                      field.onChange([...current, user.id])
+                                    } else {
+                                      field.onChange(
+                                        current.filter((id) => id !== user.id),
+                                      )
+                                    }
+                                  }}
+                                />
+                              </FormControl>
+                              <FormLabel className="text-sm font-normal">
+                                {user.name} ({user.email})
+                              </FormLabel>
+                            </FormItem>
+                          )}
+                        />
+                      ))
+                    )}
+                  </div>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
             <FormField
               control={form.control}
@@ -445,51 +491,69 @@ export default function FormTaskEditDialog({
 }
 
 /*
-<FormField
-              control={form.control}
-              name="contactPerson"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="text-gray-500">
-                    Contact Person
-                  </FormLabel>
-                  <FormControl>
-                    <Input {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <div className="flex flex-row gap-8">
-              <FormField
-                control={form.control}
-                name="contactEmail"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-500">
-                      Contact Email
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="email" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="contactPhone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-500">
-                      Contact Phone
-                    </FormLabel>
-                    <FormControl>
-                      <Input type="tel" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+// Watch for changes to the contactId field
+  const selectedContactId = useWatch({
+    control,
+    name: "contactId",
+  })
+
+  // Watch for changes to the clientId field
+  const selectedClientId = useWatch({
+    control,
+    name: "clientId",
+  })
+
+  // Refs to track if autofill has already occurred for the current selections
+  const hasAutofilledClient = useRef(false)
+  const hasAutofilledContact = useRef(false)
+
+  useEffect(() => {
+    // console.log("useEffect for selectedContactId triggered:", selectedContactId) // Debug log
+
+    const selectedContact = contacts.find(
+      (contact) => contact.id === selectedContactId,
+    )
+
+    if (selectedContact?.clientId && !hasAutofilledClient.current) {
+      // Only update if the clientId is different
+      if (form.getValues("clientId") !== selectedContact.clientId) {
+        setValue("clientId", selectedContact.clientId) // Autofill clientId
+        hasAutofilledClient.current = true // Mark as autofilled
+      }
+    } else if (!selectedContactId) {
+      // Reset autofill flag if no contact is selected
+      hasAutofilledClient.current = false
+      // Fallback to task.clientId if no client reference
+      if (form.getValues("clientId") !== (task.clientId || undefined)) {
+        setValue("clientId", task.clientId || undefined)
+      }
+    }
+  }, [selectedContactId, contacts, setValue, task.clientId])
+
+  useEffect(() => {
+    // console.log("useEffect for selectedClientId triggered:", selectedClientId) // Debug log
+
+    if (selectedClientId && !hasAutofilledContact.current) {
+      const associatedContacts = contacts.filter(
+        (contact) => contact.clientId === selectedClientId,
+      )
+
+      if (associatedContacts.length > 0) {
+        // Set the contactId to the first associated contact's ID
+        if (form.getValues("contactId") !== associatedContacts[0].id) {
+          setValue("contactId", associatedContacts[0].id)
+          hasAutofilledContact.current = true // Mark as autofilled
+        }
+      } else {
+        // Clear the contactId if no associated contacts
+        if (form.getValues("contactId")) {
+          setValue("contactId", "")
+        }
+        hasAutofilledContact.current = false // Reset flag
+      }
+    } else if (!selectedClientId) {
+      // Reset autofill flag if no client is selected
+      hasAutofilledContact.current = false
+    }
+  }, [selectedClientId, contacts, setValue])
 */

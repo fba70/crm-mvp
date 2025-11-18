@@ -92,7 +92,7 @@ export default function TaskPage() {
     notFound()
   }
 
-  console.log("TASK", task)
+  // console.log("TASK", task)
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -324,6 +324,21 @@ export default function TaskPage() {
                         >
                           <ChevronsRight />
                         </Button>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              )}
+
+              {task.collaborators && task.collaborators.length > 0 && (
+                <>
+                  <div className="pr-2 text-sm text-gray-500">
+                    Collaborators:
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    {task.collaborators.map((collaborator) => (
+                      <div key={collaborator.id} className="text-lg">
+                        {collaborator.name || "—"}
                       </div>
                     ))}
                   </div>
