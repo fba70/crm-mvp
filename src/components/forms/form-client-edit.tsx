@@ -27,6 +27,7 @@ type ClientEditFormFields = {
   email?: string
   phone?: string
   address?: string
+  webUrl?: string
 }
 
 export default function FormClientEditDialog({
@@ -44,6 +45,7 @@ export default function FormClientEditDialog({
       email: client.email || "",
       phone: client.phone || "",
       address: client.address || "",
+      webUrl: client.webUrl || "",
     },
   })
 
@@ -133,6 +135,19 @@ export default function FormClientEditDialog({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel className="text-gray-500">Address</FormLabel>
+                  <FormControl>
+                    <Input {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="webUrl"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel className="text-gray-500">Website URL</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>

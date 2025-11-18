@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useTransition } from "react"
+import { useEffect, useState, useTransition, useRef } from "react" // Add useRef
 import { useForm, useWatch } from "react-hook-form"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -89,24 +89,65 @@ export default function FormTaskEditDialog({
     name: "contactId",
   })
 
-  // Autofill clientId based on the selected contactId
+  // Watch for changes to the clientId field
+  const selectedClientId = useWatch({
+    control,
+    name: "clientId",
+  })
+
+  // Refs to track if autofill has already occurred for the current selections
+  const hasAutofilledClient = useRef(false)
+  const hasAutofilledContact = useRef(false)
+
   useEffect(() => {
+    // console.log("useEffect for selectedContactId triggered:", selectedContactId) // Debug log
+
     const selectedContact = contacts.find(
       (contact) => contact.id === selectedContactId,
     )
 
-    if (selectedContact?.clientId) {
+    if (selectedContact?.clientId && !hasAutofilledClient.current) {
       // Only update if the clientId is different
       if (form.getValues("clientId") !== selectedContact.clientId) {
         setValue("clientId", selectedContact.clientId) // Autofill clientId
+        hasAutofilledClient.current = true // Mark as autofilled
       }
-    } else {
+    } else if (!selectedContactId) {
+      // Reset autofill flag if no contact is selected
+      hasAutofilledClient.current = false
       // Fallback to task.clientId if no client reference
       if (form.getValues("clientId") !== (task.clientId || undefined)) {
         setValue("clientId", task.clientId || undefined)
       }
     }
-  }, [selectedContactId, contacts, setValue, task.clientId, form])
+  }, [selectedContactId, contacts, setValue, task.clientId])
+
+  useEffect(() => {
+    // console.log("useEffect for selectedClientId triggered:", selectedClientId) // Debug log
+
+    if (selectedClientId && !hasAutofilledContact.current) {
+      const associatedContacts = contacts.filter(
+        (contact) => contact.clientId === selectedClientId,
+      )
+
+      if (associatedContacts.length > 0) {
+        // Set the contactId to the first associated contact's ID
+        if (form.getValues("contactId") !== associatedContacts[0].id) {
+          setValue("contactId", associatedContacts[0].id)
+          hasAutofilledContact.current = true // Mark as autofilled
+        }
+      } else {
+        // Clear the contactId if no associated contacts
+        if (form.getValues("contactId")) {
+          setValue("contactId", "")
+        }
+        hasAutofilledContact.current = false // Reset flag
+      }
+    } else if (!selectedClientId) {
+      // Reset autofill flag if no client is selected
+      hasAutofilledContact.current = false
+    }
+  }, [selectedClientId, contacts, setValue])
 
   const [isPending, startTransition] = useTransition()
   const [open, setOpen] = useState(false)
@@ -133,6 +174,9 @@ export default function FormTaskEditDialog({
         onSuccess(res.data)
         toast.success("Task updated successfully")
         setOpen(false)
+        // Reset autofill flags on successful submit
+        hasAutofilledClient.current = false
+        hasAutofilledContact.current = false
       } catch (err) {
         console.log("Task update error", err)
         setError("Failed to update task")
@@ -158,6 +202,7 @@ export default function FormTaskEditDialog({
             className="space-y-4"
             autoComplete="off"
           >
+            {/* Form fields remain the same */}
             <div className="flex flex-row gap-8">
               <FormField
                 control={form.control}
@@ -279,7 +324,10 @@ export default function FormTaskEditDialog({
                     <FormLabel className="text-gray-500">Client</FormLabel>
                     <FormControl>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value)
+                          hasAutofilledContact.current = false // Reset on manual change
+                        }}
                         value={field.value || ""}
                       >
                         <SelectTrigger>
@@ -307,7 +355,10 @@ export default function FormTaskEditDialog({
                     <FormLabel className="text-gray-500">Contact</FormLabel>
                     <FormControl>
                       <Select
-                        onValueChange={field.onChange}
+                        onValueChange={(value) => {
+                          field.onChange(value)
+                          hasAutofilledClient.current = false // Reset on manual change
+                        }}
                         value={field.value || ""}
                       >
                         <SelectTrigger>

@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useSession } from "@/lib/auth-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,13 +39,13 @@ export default function TaskPage() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [loadingContacts, setLoadingContacts] = useState(false)
 
-  const fetchTask = () => {
+  const fetchTask = useCallback(() => {
     setLoading(true)
     axiosApi
       .get(`/api/task/${id}`)
       .then((res) => setTask(res.data))
       .finally(() => setLoading(false))
-  }
+  }, [id])
 
   const fetchClients = () => {
     setClientsLoading(true)
@@ -81,7 +81,7 @@ export default function TaskPage() {
     fetchClients()
     fetchUsers()
     fetchContacts()
-  }, [id, router])
+  }, [id])
 
   if (loading || clientsLoading || loadingUsers || loadingContacts)
     return <TaskLoading />

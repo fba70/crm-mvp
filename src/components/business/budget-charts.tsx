@@ -24,6 +24,8 @@ import {
   Pie,
   PieChart,
   Cell,
+  Legend,
+  Tooltip,
 } from "recharts"
 import { useState } from "react"
 import Link from "next/link"
@@ -51,6 +53,7 @@ const data1 = [
   {
     name: "Jan",
     revenues: 3700,
+    revenueGoals: 5000,
     clients: 4,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -62,6 +65,7 @@ const data1 = [
   {
     name: "Feb",
     revenues: 6900,
+    revenueGoals: 5000,
     clients: 6,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -79,6 +83,7 @@ const data1 = [
   {
     name: "Mar",
     revenues: 8400,
+    revenueGoals: 9000,
     clients: 7,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -101,6 +106,7 @@ const data1 = [
   {
     name: "Apr",
     revenues: 4900,
+    revenueGoals: 6000,
     clients: 5,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -113,6 +119,7 @@ const data1 = [
   {
     name: "May",
     revenues: 4900,
+    revenueGoals: 4000,
     clients: 5,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -125,6 +132,7 @@ const data1 = [
   {
     name: "Jun",
     revenues: 3700,
+    revenueGoals: 5000,
     clients: 4,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -136,6 +144,7 @@ const data1 = [
   {
     name: "Jul",
     revenues: 1500,
+    revenueGoals: 2500,
     clients: 2,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -145,6 +154,7 @@ const data1 = [
   {
     name: "Aug",
     revenues: 1000,
+    revenueGoals: 2000,
     clients: 1,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -153,6 +163,7 @@ const data1 = [
   {
     name: "Sep",
     revenues: 3000,
+    revenueGoals: 3000,
     clients: 3,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -163,6 +174,7 @@ const data1 = [
   {
     name: "Oct",
     revenues: 8400,
+    revenueGoals: 7000,
     clients: 7,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1000 },
@@ -182,12 +194,26 @@ const data1 = [
       },
     ],
   },
+  {
+    name: "Nov",
+    revenues: 4000,
+    revenueGoals: 7000,
+    clients: 5,
+    clientNames: [
+      { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb", revenues: 1500 },
+      { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl", revenues: 300 },
+      { name: "HUTCHISON", id: "cmf80xjjm000b3b6ok7gh29ff", revenues: 1200 },
+      { name: "A1", id: "cmfawbb9i00013b6ondhccvmf", revenues: 500 },
+      { name: "LAOLA1", id: "cmfawd58q00033b6ogaqm57xi", revenues: 500 },
+    ],
+  },
 ]
 
 const data2 = [
   {
     name: "Jan",
     clients: 4,
+    targetClients: 4,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -198,6 +224,7 @@ const data2 = [
   {
     name: "Feb",
     clients: 6,
+    targetClients: 7,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -210,6 +237,7 @@ const data2 = [
   {
     name: "Mar",
     clients: 7,
+    targetClients: 8,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -223,6 +251,7 @@ const data2 = [
   {
     name: "Apr",
     clients: 5,
+    targetClients: 7,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -234,6 +263,7 @@ const data2 = [
   {
     name: "May",
     clients: 5,
+    targetClients: 6,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -245,6 +275,7 @@ const data2 = [
   {
     name: "Jun",
     clients: 4,
+    targetClients: 3,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -255,6 +286,7 @@ const data2 = [
   {
     name: "Jul",
     clients: 2,
+    targetClients: 1,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -263,11 +295,13 @@ const data2 = [
   {
     name: "Aug",
     clients: 1,
+    targetClients: 0,
     clientNames: [{ name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" }],
   },
   {
     name: "Sep",
     clients: 3,
+    targetClients: 3,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -277,6 +311,7 @@ const data2 = [
   {
     name: "Oct",
     clients: 7,
+    targetClients: 5,
     clientNames: [
       { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
       { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
@@ -285,6 +320,17 @@ const data2 = [
       { name: "LAOLA1", id: "cmfawd58q00033b6ogaqm57xi" },
       { name: "WILLHABEN", id: "4c40b3c5-5d29-437a-97c8-3ed8d50932dc" },
       { name: "Heute.at", id: "1ef11ffb-41d7-4c78-a59d-10a01bed96dd" },
+    ],
+  },
+  {
+    name: "Nov",
+    clients: 4,
+    targetClients: 7,
+    clientNames: [
+      { name: "XXX Lutz", id: "cmf80m50800073b6on748qtxb" },
+      { name: "SPAR", id: "cmf80ws0000093b6ood9bsdtl" },
+      { name: "HUTCHISON", id: "cmf80xjjm000b3b6ok7gh29ff" },
+      { name: "A1", id: "cmfawbb9i00013b6ondhccvmf" },
     ],
   },
 ]
@@ -353,8 +399,16 @@ interface MonthlyData {
   name: string // Month name
   clients: number // Number of clients
   revenues?: number
+  revenueGoals?: number
+  targetClients?: number
   clientNames: { name: string; id: string; revenues?: number }[] // Array of client objects with name and id
 }
+
+/*
+<ChartTooltip
+                    content={<ChartTooltipContent indicator="dashed" />}
+                  />
+*/
 
 export default function BudgetCharts() {
   const [dialogData, setDialogData] = useState<MonthlyData | null>(null) // State to hold the data for the dialog
@@ -381,15 +435,15 @@ export default function BudgetCharts() {
               <TabsTrigger value="deals">Client Deals</TabsTrigger>
               <TabsTrigger value="types">Client Types</TabsTrigger>
             </TabsList>
-            <TabsContent value="revs">
+            <TabsContent value="revs" className="p-0">
               <ChartContainer
                 config={chartConfig}
-                className="h-[200px] w-[340px]"
+                className="h-[200px] w-[340px] p-0"
               >
                 <BarChart
                   accessibilityLayer
                   data={data1}
-                  margin={{ top: 10, right: 0, left: -20, bottom: 0 }}
+                  margin={{ top: 0, right: 0, left: -15, bottom: -10 }}
                 >
                   <CartesianGrid vertical={false} />
                   <XAxis
@@ -399,19 +453,31 @@ export default function BudgetCharts() {
                     axisLine={false}
                     angle={-90}
                     textAnchor="start"
-                    dy={15}
+                    dy={10}
                   />
                   <YAxis />
-
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dashed" />}
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    height={0}
+                    formatter={(value) => {
+                      const legendNames: Record<string, string> = {
+                        revenues: "Achieved Revenues",
+                        revenueGoals: "Revenue Goals",
+                      }
+                      return legendNames[value as string] || value
+                    }}
                   />
                   <Bar
                     dataKey="revenues"
                     fill="#3b82f6"
                     radius={4}
                     onClick={(data) => handleBarClick(data)}
+                  />
+                  <Bar
+                    dataKey="revenueGoals"
+                    fill="#10b981" // Green for revenue goals
+                    radius={4}
                   />
                 </BarChart>
               </ChartContainer>
@@ -435,12 +501,20 @@ export default function BudgetCharts() {
                     axisLine={false}
                     angle={-90}
                     textAnchor="start"
-                    dy={15}
+                    dy={10}
                   />
                   <YAxis />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dashed" />}
+                  <Legend
+                    verticalAlign="bottom"
+                    align="center"
+                    height={0}
+                    formatter={(value) => {
+                      const legendNames: Record<string, string> = {
+                        clients: "Achieved Clients",
+                        targetClients: "Target Clients",
+                      }
+                      return legendNames[value as string] || value
+                    }}
                   />
                   <Bar
                     dataKey="clients"
@@ -448,6 +522,7 @@ export default function BudgetCharts() {
                     radius={4}
                     onClick={(data) => handleBarClick(data)}
                   />
+                  <Bar dataKey="targetClients" fill="#10b981" radius={4} />
                 </BarChart>
               </ChartContainer>
             </TabsContent>
@@ -514,10 +589,25 @@ export default function BudgetCharts() {
                   <p className="text-sm text-gray-400">Clients:</p>{" "}
                   {dialogData.clients}
                 </div>
+              </div>
+
+              <div className="flex flex-row justify-between gap-6">
                 {dialogData.revenues && (
                   <div className="flex flex-row items-center justify-center gap-2">
                     <p className="text-sm text-gray-400">Revenues:</p>{" "}
                     {dialogData.revenues}
+                  </div>
+                )}
+                {dialogData.revenueGoals && (
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <p className="text-sm text-gray-400">Target revenues:</p>{" "}
+                    {dialogData.revenueGoals}
+                  </div>
+                )}
+                {dialogData.targetClients && (
+                  <div className="flex flex-row items-center justify-center gap-2">
+                    <p className="text-sm text-gray-400">Target clients:</p>{" "}
+                    {dialogData.targetClients}
                   </div>
                 )}
               </div>

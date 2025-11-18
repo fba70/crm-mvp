@@ -57,6 +57,7 @@ export type Client = {
   email?: string | null
   phone?: string | null
   address?: string | null
+  webUrl?: string | null
   createdAt: string | Date
   updatedAt: string | Date
   createdById?: string | null

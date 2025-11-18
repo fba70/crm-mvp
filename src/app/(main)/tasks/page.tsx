@@ -17,6 +17,7 @@ import {
   SelectItem,
 } from "@/components/ui/select"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Button } from "@/components/ui/button"
 
 export default function TasksPage() {
   const { data: user, isPending } = useSession()
@@ -31,11 +32,23 @@ export default function TasksPage() {
   const [clientsLoading, setClientsLoading] = useState(false)
   const [contacts, setContacts] = useState<Contact[]>([])
   const [contactsLoading, setContactsLoading] = useState(false)
-  const [typeFilter, setTypeFilter] = useState<string>("ALL")
-  const [clientNameFilter, setClientNameFilter] = useState("")
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc")
-  const [priorityFilter, setPriorityFilter] = useState<string>("ALL")
-  const [showClosed, setShowClosed] = useState(false)
+
+  // Filters
+  const [typeFilter, setTypeFilter] = useState<string>(
+    () => sessionStorage.getItem("typeFilter") || "ALL",
+  )
+  const [clientNameFilter, setClientNameFilter] = useState<string>(
+    () => sessionStorage.getItem("clientNameFilter") || "",
+  )
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
+    () => (sessionStorage.getItem("sortOrder") as "asc" | "desc") || "desc",
+  )
+  const [priorityFilter, setPriorityFilter] = useState<string>(
+    () => sessionStorage.getItem("priorityFilter") || "ALL",
+  )
+  const [showClosed, setShowClosed] = useState<boolean>(
+    () => sessionStorage.getItem("showClosed") === "true",
+  )
 
   const fetchTasks = () => {
     setLoading(true)
@@ -72,6 +85,41 @@ export default function TasksPage() {
     fetchContacts()
   }, [])
 
+  // Save filters to sessionStorage whenever they change
+  useEffect(() => {
+    const currentTypeFilter = sessionStorage.getItem("typeFilter")
+    const currentClientNameFilter = sessionStorage.getItem("clientNameFilter")
+    const currentSortOrder = sessionStorage.getItem("sortOrder")
+    const currentPriorityFilter = sessionStorage.getItem("priorityFilter")
+    const currentShowClosed = sessionStorage.getItem("showClosed")
+
+    if (currentTypeFilter !== typeFilter) {
+      sessionStorage.setItem("typeFilter", typeFilter)
+    }
+    if (currentClientNameFilter !== clientNameFilter) {
+      sessionStorage.setItem("clientNameFilter", clientNameFilter)
+    }
+    if (currentSortOrder !== sortOrder) {
+      sessionStorage.setItem("sortOrder", sortOrder)
+    }
+    if (currentPriorityFilter !== priorityFilter) {
+      sessionStorage.setItem("priorityFilter", priorityFilter)
+    }
+    if (currentShowClosed !== showClosed.toString()) {
+      sessionStorage.setItem("showClosed", showClosed.toString())
+    }
+  }, [typeFilter, clientNameFilter, sortOrder, priorityFilter, showClosed])
+
+  // Reset filters to default values
+  const resetFilters = () => {
+    setTypeFilter("ALL")
+    setClientNameFilter("")
+    setSortOrder("desc")
+    setPriorityFilter("ALL")
+    setShowClosed(false)
+    sessionStorage.clear() // Clear all saved filters
+  }
+
   const filteredTasks = tasks
     ?.filter(
       (task) =>
@@ -97,15 +145,20 @@ export default function TasksPage() {
       <div className="space-y-6">
         <div className="flex flex-row justify-between px-4">
           <h1 className="pl-2 text-2xl font-semibold">Tasks</h1>
-          {user && (
-            <FormNewTaskDialog
-              clients={clients}
-              contacts={contacts}
-              userId={user?.user.id}
-              onSuccess={() => fetchTasks()}
-              triggerLabel="Add New Task"
-            />
-          )}
+          <div className="flex flex-row gap-2">
+            <Button variant="outline" onClick={resetFilters}>
+              Reset Filters
+            </Button>
+            {user && (
+              <FormNewTaskDialog
+                clients={clients}
+                contacts={contacts}
+                userId={user?.user.id}
+                onSuccess={() => fetchTasks()}
+                triggerLabel="Add New Task"
+              />
+            )}
+          </div>
         </div>
 
         <div className="mb-3 flex flex-row items-center justify-between gap-4 px-6">

@@ -81,6 +81,11 @@ export default function ClientItemPage() {
                 {client?.address || "N/A"}
               </div>
 
+              <div className="text-gray-400">Website URL:</div>
+              <div className="text-xl text-black dark:text-gray-300">
+                {client?.webUrl || "N/A"}
+              </div>
+
               <div className="text-gray-400">Creation Date:</div>
               <div className="text-xl text-black dark:text-gray-300">
                 {client?.createdAt

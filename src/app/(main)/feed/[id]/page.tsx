@@ -4,7 +4,6 @@ import { JSX, useEffect, useState } from "react"
 import { useParams } from "next/navigation"
 import { useSession } from "@/lib/auth-client"
 import { useRouter } from "next/navigation"
-import axios from "axios"
 import RouteButton from "@/components/business/route-button"
 import FeedItemLoading from "./loading"
 import { unauthorized, notFound } from "next/navigation"
@@ -27,6 +26,7 @@ import BookingRequestDialog from "@/components/forms/form-booking-request"
 import { format } from "date-fns"
 import { cn } from "@/lib/utils"
 import { toast } from "sonner"
+import axios from "axios"
 import axiosApi from "@/lib/axios"
 
 export default function FeedItemPage() {
@@ -173,7 +173,9 @@ export default function FeedItemPage() {
 
           return (
             <div key={index}>
-              <p className="font-semibold">{title}</p>
+              <p className="font-semibold text-gray-700 dark:text-gray-300">
+                {title}
+              </p>
               <p className="text-gray-700 dark:text-gray-300">{text}</p>
             </div>
           )
@@ -205,7 +207,9 @@ export default function FeedItemPage() {
 
           return (
             <div key={index}>
-              <p className="font-semibold">{title}</p>
+              <p className="font-semibold text-gray-700 dark:text-gray-300">
+                {title}
+              </p>
               <p className="text-gray-700 dark:text-gray-300">{text}</p>
             </div>
           )
@@ -473,6 +477,7 @@ export default function FeedItemPage() {
                 value={userPrompt}
                 onChange={(e) => setUserPrompt(e.target.value)}
               />
+
               <Button
                 variant="default"
                 className="mt-2"
@@ -481,12 +486,15 @@ export default function FeedItemPage() {
               >
                 {isLoading ? "Processing..." : "Submit Request"}
               </Button>
+
               {response && (
                 <div className="mt-3 rounded-md border border-gray-300 p-3">
-                  <p className="text-sm text-gray-700">
+                  <div className="mb-1 text-sm text-gray-700 dark:text-gray-300">
                     AI-assistant response:
-                  </p>
-                  <p className="text-sm text-gray-900">{response}</p>
+                  </div>
+                  <div className="text-sm text-gray-900">
+                    {parseFeedback(response)}
+                  </div>
                   <div className="flex flex-col gap-3">
                     <Button
                       variant="default"

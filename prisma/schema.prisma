@@ -159,6 +159,7 @@ model Client {
   email           String?
   phone           String?
   address         String?
+  webUrl          String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 

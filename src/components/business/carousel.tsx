@@ -33,13 +33,17 @@ export function TasksCarousel({
 }) {
   const router = useRouter()
 
-  const [currentIndex, setCurrentIndex] = useState(2)
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [isScrolling, setIsScrolling] = useState(false)
   const [statusDialogOpen1, setStatusDialogOpen1] = useState(false)
   const [statusDialogOpen2, setStatusDialogOpen2] = useState(false)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
 
   // console.log("Tasks in carousel:", tasks)
+
+  useEffect(() => {
+    setCurrentIndex(0)
+  }, [tasks])
 
   const handleScroll = (direction: "up" | "down") => {
     if (isScrolling) return
@@ -139,6 +143,17 @@ export function TasksCarousel({
   }
 
   // Gradient: bg-gradient-to-t from-white to-gray-200
+
+  // If tasks list is empty, show the message
+  if (tasks.length === 0) {
+    return (
+      <div className="flex h-[67vh] w-full items-center justify-center">
+        <p className="text-lg text-gray-500">
+          The filtered list of tasks is empty
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="relative h-[67vh] w-full overflow-hidden">

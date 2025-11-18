@@ -11,7 +11,7 @@ import FormNewContactDialog from "@/components/forms/form-new-contact"
 import FormClientEditDialog from "@/components/forms/form-client-edit"
 import FormContactEditDialog from "@/components/forms/form-contact-edit"
 import { Card, CardContent } from "@/components/ui/card"
-import { MapPinHouse, AtSign, Phone } from "lucide-react"
+import { MapPinHouse, AtSign, Phone, Globe } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -181,6 +181,19 @@ function ClientCards({
                 </div>
               </div>
 
+              {client.webUrl && (
+                <Link
+                  href={client.webUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:underline"
+                >
+                  <div className="flex flex-row items-center gap-3 text-sm">
+                    <Globe size={18} />
+                    {client.webUrl}
+                  </div>
+                </Link>
+              )}
               {client.address && (
                 <Link
                   href={`https://www.google.com/maps/search/?api=1&query=${client.address}`}
