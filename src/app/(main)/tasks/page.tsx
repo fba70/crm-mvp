@@ -34,20 +34,30 @@ export default function TasksPage() {
   const [contactsLoading, setContactsLoading] = useState(false)
 
   // Filters
-  const [typeFilter, setTypeFilter] = useState<string>(
-    () => sessionStorage.getItem("typeFilter") || "ALL",
+  const [typeFilter, setTypeFilter] = useState<string>(() =>
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("typeFilter") || "ALL"
+      : "ALL",
   )
-  const [clientNameFilter, setClientNameFilter] = useState<string>(
-    () => sessionStorage.getItem("clientNameFilter") || "",
+  const [clientNameFilter, setClientNameFilter] = useState<string>(() =>
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("clientNameFilter") || ""
+      : "",
   )
-  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(
-    () => (sessionStorage.getItem("sortOrder") as "asc" | "desc") || "desc",
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">(() =>
+    typeof window !== "undefined"
+      ? (sessionStorage.getItem("sortOrder") as "asc" | "desc") || "desc"
+      : "desc",
   )
-  const [priorityFilter, setPriorityFilter] = useState<string>(
-    () => sessionStorage.getItem("priorityFilter") || "ALL",
+  const [priorityFilter, setPriorityFilter] = useState<string>(() =>
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("priorityFilter") || "ALL"
+      : "ALL",
   )
-  const [showClosed, setShowClosed] = useState<boolean>(
-    () => sessionStorage.getItem("showClosed") === "true",
+  const [showClosed, setShowClosed] = useState<boolean>(() =>
+    typeof window !== "undefined"
+      ? sessionStorage.getItem("showClosed") === "true"
+      : false,
   )
 
   const fetchTasks = () => {
