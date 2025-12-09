@@ -53,7 +53,7 @@ export default function FormNewContactDialog({
       email: "",
       phone: "",
       position: "",
-      clientId: "",
+      clientId: clients[0]?.id || "",
       createdById: userId,
     },
   })
@@ -165,7 +165,13 @@ export default function FormNewContactDialog({
                       value={field.value || ""}
                     >
                       <SelectTrigger>
-                        <SelectValue placeholder="Select client" />
+                        <SelectValue>
+                          {field.value
+                            ? clients.find(
+                                (client) => client.id === field.value,
+                              )?.name || "Select client"
+                            : "Select client"}
+                        </SelectValue>
                       </SelectTrigger>
                       <SelectContent>
                         {clients.map((client) => (
