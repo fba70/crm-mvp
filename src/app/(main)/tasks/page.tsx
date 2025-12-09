@@ -189,7 +189,7 @@ export default function TasksPage() {
               onCheckedChange={(v) => setShowClosed(Boolean(v))}
             />
             <label htmlFor="show-closed" className="text-sm">
-              include closed tasks
+              include closed
             </label>
           </div>
         </div>
