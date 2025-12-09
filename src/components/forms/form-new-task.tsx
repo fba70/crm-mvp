@@ -163,8 +163,14 @@ export default function FormNewTaskDialog({
         createdById: userId,
         assignedToId: userId,
         parentTaskId: parentTaskId || undefined,
-        clientId: data.clientId === "No client" ? null : data.clientId, // Convert empty value to null
-        contactId: data.contactId === "No contact" ? null : data.contactId, // Convert empty value to null
+        clientId:
+          data.clientId === "No client" || data.clientId === ""
+            ? null
+            : data.clientId, // Convert "No client" or empty string to null
+        contactId:
+          data.contactId === "No contact" || data.contactId === ""
+            ? null
+            : data.contactId, // Convert "No contact" or empty string to null
         collaborators: {
           connect: data.collaborators?.map((id) => ({ id })) || [], // Connect collaborators by ID
         },
