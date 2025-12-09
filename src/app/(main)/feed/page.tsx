@@ -219,15 +219,15 @@ function FeedCards({
                 <div className="flex flex-row items-center justify-center gap-2">
                   <div
                     className={cn(
-                      "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm",
+                      "rounded-xl border-1 border-gray-300 px-2 py-1 text-sm dark:border-gray-700",
                       feedItem.type === "RECOMMENDATION" &&
-                        "bg-gradient-to-t from-blue-100 to-transparent",
+                        "bg-gradient-to-t from-blue-100 to-transparent dark:from-blue-200 dark:to-white dark:text-black",
                       feedItem.type === "CLIENT_ACTIVITY" &&
-                        "bg-gradient-to-t from-cyan-100 to-transparent",
+                        "bg-gradient-to-t from-cyan-100 to-transparent dark:from-cyan-200 dark:to-white dark:text-black",
                       feedItem.type === "INDUSTRY_INFO" &&
-                        "bg-gradient-to-t from-pink-100 to-transparent",
+                        "bg-gradient-to-t from-pink-100 to-transparent dark:from-pink-200 dark:to-white dark:text-black",
                       feedItem.type === "COLLEAGUES_UPDATE" &&
-                        "bg-gradient-to-t from-green-100 to-transparent",
+                        "bg-gradient-to-t from-green-100 to-transparent dark:from-green-200 dark:to-white dark:text-black",
                     )}
                   >
                     {feedItem.type

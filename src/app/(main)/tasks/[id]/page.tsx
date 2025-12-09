@@ -1,6 +1,6 @@
 "use client"
 
-import { useCallback, useEffect, useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter, useParams } from "next/navigation"
 import { useSession } from "@/lib/auth-client"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -39,48 +39,43 @@ export default function TaskPage() {
   const [contacts, setContacts] = useState<Contact[]>([])
   const [loadingContacts, setLoadingContacts] = useState(false)
 
-  const fetchTask = useCallback(() => {
-    setLoading(true)
-    axiosApi
-      .get(`/api/task/${id}`)
-      .then((res) => setTask(res.data))
-      .finally(() => setLoading(false))
-  }, [id])
-
-  const fetchClients = () => {
-    setClientsLoading(true)
-    axiosApi
-      .get("/api/client")
-      .then((res) => setClients(res.data))
-      .finally(() => setClientsLoading(false))
-  }
-
-  const fetchContacts = () => {
-    setLoadingContacts(true)
-    axiosApi
-      .get("/api/contact")
-      .then((res) => setContacts(res.data))
-      .finally(() => setLoadingContacts(false))
-  }
-
-  const fetchUsers = async () => {
-    try {
-      const response = await axiosApi.get("/api/user")
-      setUsers(response.data)
-    } catch (error) {
-      console.error("Failed to fetch users:", error)
-    } finally {
-      setLoadingUsers(false)
-    }
-  }
-
   useEffect(() => {
     if (!id) return
 
-    fetchTask()
-    fetchClients()
-    fetchUsers()
-    fetchContacts()
+    // Reset states to show loading indicator and prevent stale data
+    setTask(null)
+    setClients([])
+    setContacts([])
+    setUsers([])
+    setLoading(true)
+    setClientsLoading(true)
+    setLoadingContacts(true)
+    setLoadingUsers(true)
+
+    const fetchAllData = async () => {
+      try {
+        const [taskRes, clientsRes, contactsRes, usersRes] = await Promise.all([
+          axiosApi.get(`/api/task/${id}`),
+          axiosApi.get("/api/client"),
+          axiosApi.get("/api/contact"),
+          axiosApi.get("/api/user"),
+        ])
+        setTask(taskRes.data)
+        setClients(clientsRes.data)
+        setContacts(contactsRes.data)
+        setUsers(usersRes.data)
+      } catch (error) {
+        console.error("Failed to fetch task page data:", error)
+        // Optionally set an error state here
+      } finally {
+        setLoading(false)
+        setClientsLoading(false)
+        setLoadingContacts(false)
+        setLoadingUsers(false)
+      }
+    }
+
+    fetchAllData()
   }, [id])
 
   if (loading || clientsLoading || loadingUsers || loadingContacts)
@@ -92,7 +87,14 @@ export default function TaskPage() {
     notFound()
   }
 
-  // console.log("TASK", task)
+  const handleSuccess = () => {
+    setLoading(true)
+    axiosApi
+      .get(`/api/task/${id}`)
+      .then((res) => setTask(res.data))
+      .catch((err) => console.error("Failed to refetch task", err))
+      .finally(() => setLoading(false))
+  }
 
   return (
     <main className="mx-auto flex w-full max-w-6xl flex-col px-0 pt-5">
@@ -100,7 +102,7 @@ export default function TaskPage() {
         <div className="flex w-[95%] flex-row items-center justify-between gap-2">
           <h1 className="ml-6 text-2xl font-semibold">Task</h1>
           <div className="flex flex-row gap-2">
-            <RouteButton pathParam="/tasks" nameParam="Back to all tasks" />
+            <RouteButton pathParam="/tasks" nameParam="Go to all tasks" />
 
             {task.parentTaskId && (
               <Button
@@ -111,7 +113,7 @@ export default function TaskPage() {
                   }
                 }}
               >
-                Back to parent task
+                Go to parent task
               </Button>
             )}
           </div>
@@ -364,7 +366,7 @@ export default function TaskPage() {
               task={task}
               clients={clients}
               contacts={contacts}
-              onSuccess={fetchTask}
+              onSuccess={handleSuccess}
             />
 
             {user?.user.id && (
@@ -372,7 +374,7 @@ export default function TaskPage() {
                 clients={clients}
                 contacts={contacts}
                 userId={user?.user.id}
-                onSuccess={fetchTask}
+                onSuccess={handleSuccess}
                 triggerLabel="Add Linked Task"
                 parentTaskId={task.id}
               />
@@ -381,7 +383,7 @@ export default function TaskPage() {
             <FormTaskTransferDialog
               taskId={task.id}
               userId={user?.user.id || ""}
-              onSuccess={fetchTask}
+              onSuccess={handleSuccess}
               triggerLabel="Transfer Task"
             />
           </div>
